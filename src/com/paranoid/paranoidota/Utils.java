@@ -49,6 +49,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
+/** Generic convenience class containing helper tools. */
 public class Utils {
 
     /** The different alarm types. */
