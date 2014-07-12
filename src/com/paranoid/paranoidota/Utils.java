@@ -53,9 +53,13 @@ import java.util.Properties;
 public class Utils {
 
     public static final String FILES_INFO = "com.paranoid.paranoidota.Utils.FILES_INFO";
+
     public static final String CHECK_DOWNLOADS_FINISHED = "com.paranoid.paranoidota.Utils.CHECK_DOWNLOADS_FINISHED";
+
     public static final String CHECK_DOWNLOADS_ID = "com.paranoid.paranoidota.Utils.CHECK_DOWNLOADS_ID";
+
     public static final String MOD_VERSION = "ro.modversion";
+
     public static final String RO_PA_VERSION = "ro.pa.version";
 
     /** The different alarm types. */
@@ -98,8 +102,13 @@ public class Utils {
         }
     }
 
-    public static PackageInfo[] sPackageInfosRom = new PackageInfo[0];
-    public static PackageInfo[] sPackageInfosGapps = new PackageInfo[0];
+    /** Information about the latest ROM packages. */
+    private static PackageInfo[] sRomPackages = new PackageInfo[0];
+
+    /** Information about the latest GApps packages. */
+    private static PackageInfo[] sGappsPackages = new PackageInfo[0];
+
+    /** The Roboto Thin/Light typeface to be used for themeing. */
     private static Typeface sRobotoThin;
 
     /**
@@ -331,15 +340,8 @@ public class Utils {
      */
     public static void showNotification(Context context, Updater.PackageInfo[] romInfo,
             Updater.PackageInfo[] gappsInfo) {
-        if (romInfo != null) {
-            sPackageInfosRom = romInfo;
-        }
-        romInfo = sPackageInfosRom;
-
-        if (gappsInfo != null) {
-            sPackageInfosGapps = gappsInfo;
-        }
-        gappsInfo = sPackageInfosGapps;
+        romInfo = romInfo != null ? (sRomPackages = romInfo) : sRomPackages;
+        gappsInfo = gappsInfo != null ? (sGappsPackages = gappsInfo) : sGappsPackages;
 
         final Resources res = context.getResources();
 
