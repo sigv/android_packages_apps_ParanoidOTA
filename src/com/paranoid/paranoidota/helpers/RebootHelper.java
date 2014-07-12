@@ -36,6 +36,9 @@ import com.paranoid.paranoidota.signalv.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class RebootHelper {
 
@@ -95,7 +98,7 @@ public class RebootHelper {
         final CheckBox cbSdext = (CheckBox) view.findViewById(R.id.sdext);
         final EditText input = (EditText) view.findViewById(R.id.backupname);
 
-        input.setText(Utils.getDateAndTime());
+        input.setText(new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss", Locale.US).format(new Date()));
         input.selectAll();
 
         if (!IOUtils.hasAndroidSecure()) {

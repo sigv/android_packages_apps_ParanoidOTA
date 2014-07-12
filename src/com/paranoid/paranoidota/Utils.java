@@ -47,9 +47,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 
 public class Utils {
@@ -218,11 +215,6 @@ public class Utils {
         }
 
         return device;
-    }
-
-    public static String getDateAndTime() {
-        return new SimpleDateFormat("yyyy-MM-dd.HH.mm.ss").format(new Date(System
-                .currentTimeMillis()));
     }
 
     public static boolean isNetworkAvailable(Context context) {
