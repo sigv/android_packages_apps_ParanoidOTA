@@ -23,12 +23,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.paranoid.paranoidota.Utils.AlarmType;
+
 public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Utils.setAlarm(context, true, true);
-        Utils.setAlarm(context, true, false);
+        Utils.setAlarm(context, AlarmType.ROM, true);
+        Utils.setAlarm(context, AlarmType.GAPPS, true);
     }
 
 }

@@ -38,6 +38,7 @@ import android.widget.EditText;
 import com.paranoid.paranoidota.URLStringReader;
 import com.paranoid.paranoidota.URLStringReader.URLStringReaderListener;
 import com.paranoid.paranoidota.Utils;
+import com.paranoid.paranoidota.Utils.AlarmType;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.widget.Preference;
@@ -112,7 +113,7 @@ public class SettingsActivity extends PreferenceActivity implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (SettingsHelper.PROPERTY_CHECK_TIME.equals(key)) {
-            Utils.setAlarm(this, mSettingsHelper.getCheckTime(), false, true);
+            Utils.setAlarm(this, AlarmType.ROM, false, mSettingsHelper.getCheckTime());
         }
         if (SettingsHelper.PROPERTY_GAPPS_TYPE.equals(key)) {
             updateSummaries();

@@ -224,32 +224,61 @@ public class Utils {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    public static void setAlarm(Context context, boolean trigger, boolean isRom) {
-
-        SettingsHelper helper = new SettingsHelper(context);
-        setAlarm(context, helper.getCheckTime(), trigger, isRom);
+    /**
+     * Sets an alarm of the specified type.
+     * 
+     * @param context the context to use for the alarm creation and scheduling
+     * @param alarmType the alarm type which the alarm should be created for
+     * @param triggerNow whether the alarm should go off now (in 0 milliseconds)
+     *            for the first time
+     */
+    public static void setAlarm(Context context, AlarmType alarmType, boolean triggerNow) {
+        setAlarm(context, alarmType, triggerNow, new SettingsHelper(context).getCheckTime());
     }
 
-    public static void setAlarm(Context context, long time, boolean trigger, boolean isRom) {
+    /**
+     * Sets an alarm of the specified type and interval length.
+     * 
+     * @param context the context to use for the alarm creation and scheduling
+     * @param alarmType the alarm type which the alarm should be created for
+     * @param triggerNow whether the alarm should go off now (in 0 milliseconds)
+     *            for the first time
+     * @param interval the count of milliseconds that should be between each
+     *            consecutive firing of the alarm
+     */
+    public static void setAlarm(Context context, AlarmType alarmType,
+            boolean triggerNow, long interval) {
+        if (context == null) {
+            throw new IllegalArgumentException("The context cannot be a null value.");
+        }
+        if (alarmType == null) {
+            throw new IllegalArgumentException("The alarm type cannot be a null value.");
+        }
+        if (interval <= 0) {
+            throw new IllegalArgumentException("The interval cannot be a non-positive value.");
+        }
 
-        Intent i = new Intent(context, NotificationAlarm.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        PendingIntent pi = PendingIntent.getBroadcast(context,
-                isRom ? AlarmType.ROM.mId : AlarmType.GAPPS.mId, i,
+        PendingIntent intent = PendingIntent.getBroadcast(context,
+                alarmType.mId, new Intent(context, NotificationAlarm.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
-        if (time > 0) {
-            am.setInexactRepeating(AlarmManager.RTC_WAKEUP, trigger ? 0 : time, time, pi);
-        }
+        am.cancel(intent);
+        am.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerNow ? 0 : interval, interval,
+                intent);
     }
 
-    public static boolean alarmExists(Context context, boolean isRom) {
-        return (PendingIntent.getBroadcast(context, isRom ? AlarmType.ROM.mId
-                : AlarmType.GAPPS.mId, new Intent(context, NotificationAlarm.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
+    /**
+     * Checks whether the specified alarm already exists.
+     * 
+     * @param context the context to use for the check
+     * @param alarmType the alarm type which should be looked for
+     * @return {@code true} if the alarm does indeed already exist
+     */
+    public static boolean alarmExists(Context context, AlarmType alarmType) {
+        return (PendingIntent.getBroadcast(context, alarmType.mId, new Intent(context,
+                NotificationAlarm.class), PendingIntent.FLAG_NO_CREATE) != null);
     }
 
     public static void showToastOnUiThread(final Context context, final int resourceId) {

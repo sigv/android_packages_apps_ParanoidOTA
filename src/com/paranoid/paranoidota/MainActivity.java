@@ -47,6 +47,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.paranoid.paranoidota.Utils.AlarmType;
 import com.paranoid.paranoidota.Utils.NotificationInfo;
 import com.paranoid.paranoidota.activities.SettingsActivity;
 import com.paranoid.paranoidota.cards.DownloadCard;
@@ -233,12 +234,12 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
             setState(mSavedInstanceState.getInt(STATE), false, true);
         }
 
-        if (!Utils.alarmExists(this, true)) {
-            Utils.setAlarm(this, true, true);
+        if (!Utils.alarmExists(this, AlarmType.ROM)) {
+            Utils.setAlarm(this, AlarmType.ROM, true);
         }
 
-        if (!Utils.alarmExists(this, false)) {
-            Utils.setAlarm(this, true, false);
+        if (!Utils.alarmExists(this, AlarmType.GAPPS)) {
+            Utils.setAlarm(this, AlarmType.GAPPS, true);
         }
     }
 
