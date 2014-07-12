@@ -31,8 +31,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.paranoid.paranoidota.IOUtils;
-import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.Utils;
+import com.paranoid.paranoidota.signalv.R;
 
 import java.io.File;
 import java.io.FileOutputStream;

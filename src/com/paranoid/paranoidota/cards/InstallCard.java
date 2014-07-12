@@ -33,11 +33,11 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
 import com.paranoid.paranoidota.IOUtils;
-import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.activities.RequestFileActivity;
 import com.paranoid.paranoidota.activities.RequestFileActivity.RequestFileCallback;
 import com.paranoid.paranoidota.helpers.RebootHelper;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.widget.Card;
 import com.paranoid.paranoidota.widget.Item;
 import com.paranoid.paranoidota.widget.Item.OnItemClickListener;

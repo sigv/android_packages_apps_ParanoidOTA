@@ -29,9 +29,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.paranoid.paranoidota.MainActivity;
-import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.helpers.DownloadHelper;
 import com.paranoid.paranoidota.helpers.DownloadHelper.DownloadCallback;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 import com.paranoid.paranoidota.widget.Card;
 import com.paranoid.paranoidota.widget.Item;

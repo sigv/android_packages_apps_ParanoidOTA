@@ -33,8 +33,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.paranoid.paranoidota.MainActivity;
-import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.Utils;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
