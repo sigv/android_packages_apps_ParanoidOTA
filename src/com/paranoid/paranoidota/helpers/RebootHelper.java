@@ -224,7 +224,7 @@ public class RebootHelper {
                 } finally {
                     if (os != null) {
                         os.close();
-                        Utils.setPermissions("/cache/recovery/" + file, 0644,
+                        Utils.chownmod("/cache/recovery/" + file, 0644,
                                 android.os.Process.myUid(), 2001);
                     }
                 }

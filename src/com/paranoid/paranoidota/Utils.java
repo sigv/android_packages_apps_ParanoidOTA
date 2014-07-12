@@ -47,7 +47,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -163,35 +162,29 @@ public class Utils {
     }
 
     /**
-     * Method borrowed from OpenDelta. Using reflection voodoo instead calling
-     * the hidden class directly, to dev/test outside of AOSP tree.
+     * Change the owner and mode of the specified file. Method inspired by code
+     * from OpenDelta (thanks to Jorrit "Chainfire" Jongma and The OmniROM
+     * Project).
      * 
-     * @author Jorrit "Chainfire" Jongma
-     * @author The OmniROM Project
+     * @param file the path to the file which should be modified
+     * @param mode the new mode to apply to the file (e.g. 0777)
+     * @param uid the new user ID to apply to the file
+     * @param gid the new group ID to apply to the file
+     * @throws RuntimeException in the case anything goes horribly wrong
      */
-    public static boolean setPermissions(String path, int mode, int uid, int gid) {
-        try {
-            Class<?> FileUtils = Utils.class.getClassLoader().loadClass("android.os.FileUtils");
-            Method setPermissions = FileUtils.getDeclaredMethod("setPermissions", new Class[] {
-                    String.class,
-                    int.class,
-                    int.class,
-                    int.class
-            });
-            return ((Integer) setPermissions.invoke(
-                    null,
-                    new Object[] {
-                            path,
-                            Integer.valueOf(mode),
-                            Integer.valueOf(uid),
-                            Integer.valueOf(gid)
-                    }) == 0);
-        } catch (Exception e) {
-            // A lot of voodoo could go wrong here, return failure instead of
-            // crash
-            e.printStackTrace();
+    public static boolean chownmod(String file, int mode, int uid, int gid) {
+        if (file == null) {
+            throw new IllegalArgumentException("The filename cannot be a null value.");
         }
-        return false;
+
+        try {
+            return (Integer) Class.forName("android.os.FileUtils").getMethod("setPermissions",
+                    String.class, int.class, int.class, int.class).invoke(null, file,
+                    mode, uid, gid) == 0;
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to change the ownership/mode of " + file,
+                    e);
+        }
     }
 
     public static String getReadableVersion(String version) {
