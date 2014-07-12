@@ -52,15 +52,33 @@ import java.util.Properties;
 
 public class Utils {
 
-    public static final String FILES_INFO = "com.paranoid.paranoidota.Utils.FILES_INFO";
+    /** The intent extras used by this application. */
+    public static enum Extras {
+        /** Notification information extra informing about the package listing. */
+        FILES_INFO(".FILES_INFO"),
+        /** Boolean extra informing if a download should be checked as finished. */
+        CHECK_DOWNLOADS_FINISHED(".CHECK_DOWNLOADS_FINISHED"),
+        /** Long extra informing which download should be checked. */
+        CHECK_DOWNLOADS_ID(".CHECK_DOWNLOADS_ID");
 
-    public static final String CHECK_DOWNLOADS_FINISHED = "com.paranoid.paranoidota.Utils.CHECK_DOWNLOADS_FINISHED";
+        /** The internal name of the extra. */
+        private final String mName;
 
-    public static final String CHECK_DOWNLOADS_ID = "com.paranoid.paranoidota.Utils.CHECK_DOWNLOADS_ID";
+        /**
+         * Initializes the extra.
+         * 
+         * @param name the internal name of the extra
+         */
+        private Extras(String name) {
+            mName = name;
+        }
 
-    public static final String MOD_VERSION = "ro.modversion";
+        /** Gets the name of the extra together with the package name. */
+        public String getName() {
+            return mName.startsWith(".") ? "com.paranoid.paranoidota" + mName : mName;
+        }
 
-    public static final String RO_PA_VERSION = "ro.pa.version";
+    }
 
     /** The different alarm types. */
     public static enum AlarmType {
@@ -346,8 +364,8 @@ public class Utils {
         final Resources res = context.getResources();
 
         final PendingIntent intent = PendingIntent.getActivity(context, Updater.NOTIFICATION_ID,
-                new Intent(context, MainActivity.class).putExtra(FILES_INFO, new NotificationInfo(
-                        Updater.NOTIFICATION_ID, romInfo, gappsInfo)),
+                new Intent(context, MainActivity.class).putExtra(Extras.FILES_INFO.getName(),
+                        new NotificationInfo(Updater.NOTIFICATION_ID, romInfo, gappsInfo)),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(res.getString(R.string.new_system_update))

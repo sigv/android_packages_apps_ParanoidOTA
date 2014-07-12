@@ -318,10 +318,11 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
     protected void onNewIntent(Intent intent) {
         mNotificationInfo = null;
         if (intent != null && intent.getExtras() != null) {
-            mNotificationInfo = (NotificationInfo) intent.getSerializableExtra(Utils.FILES_INFO);
-            if (intent.getBooleanExtra(Utils.CHECK_DOWNLOADS_FINISHED, false)) {
+            mNotificationInfo = (NotificationInfo) intent
+                    .getSerializableExtra(Utils.Extras.FILES_INFO.getName());
+            if (intent.getBooleanExtra(Utils.Extras.CHECK_DOWNLOADS_FINISHED.getName(), false)) {
                 DownloadHelper.checkDownloadFinished(this,
-                        intent.getLongExtra(Utils.CHECK_DOWNLOADS_ID, -1L));
+                        intent.getLongExtra(Utils.Extras.CHECK_DOWNLOADS_ID.getName(), -1L));
             }
         }
     }

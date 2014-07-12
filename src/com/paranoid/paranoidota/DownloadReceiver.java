@@ -32,8 +32,8 @@ public class DownloadReceiver extends BroadcastReceiver {
         Intent i = new Intent(context, MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        i.putExtra(Utils.CHECK_DOWNLOADS_FINISHED, true);
-        i.putExtra(Utils.CHECK_DOWNLOADS_ID, id);
+        i.putExtra(Utils.Extras.CHECK_DOWNLOADS_FINISHED.getName(), true);
+        i.putExtra(Utils.Extras.CHECK_DOWNLOADS_ID.getName(), id);
         context.startActivity(i);
     }
 

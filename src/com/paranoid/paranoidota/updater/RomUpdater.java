@@ -30,7 +30,7 @@ import com.paranoid.paranoidota.updater.server.PaServer;
 public class RomUpdater extends Updater {
 
     public static String getVersionString(Context context) {
-        return getDevice(context) + "-" + Utils.getProp(Utils.MOD_VERSION);
+        return getDevice(context) + "-" + Utils.getProp("ro.modversion");
     }
 
     private static String getDevice(Context context) {
