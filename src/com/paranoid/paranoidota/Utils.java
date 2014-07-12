@@ -187,39 +187,6 @@ public class Utils {
         }
     }
 
-    public static String getReadableVersion(String version) {
-        try {
-            String number = version.substring(version.indexOf("-") + 1, version.lastIndexOf("-"));
-            String date = version.substring(version.lastIndexOf("-") + 1,
-                    version.endsWith(".zip") ? version.lastIndexOf(".") : version.length());
-
-            SimpleDateFormat curFormater = new SimpleDateFormat("yyyyMMdd");
-            Date dateObj = null;
-            try {
-                dateObj = curFormater.parse(date);
-            } catch (ParseException e) {
-                // ignore
-            }
-            SimpleDateFormat postFormater = new SimpleDateFormat("MMMM dd, yyyy");
-
-            if (dateObj == null) {
-                return number;
-            }
-            String newDateStr = postFormater.format(dateObj);
-
-            StringBuilder b = new StringBuilder(newDateStr);
-            int i = 0;
-            do {
-                b.replace(i, i + 1, b.substring(i, i + 1).toUpperCase());
-                i = b.indexOf(" ", i) + 1;
-            } while (i > 0 && i < b.length());
-            return number + " - " + b.toString();
-        } catch (Exception ex) {
-            // unknown version format
-            return version;
-        }
-    }
-
     public static String translateDeviceName(Context context, String device) {
         Properties dictionary = IOUtils.getDictionary(context);
         String translate = dictionary.getProperty(device);
