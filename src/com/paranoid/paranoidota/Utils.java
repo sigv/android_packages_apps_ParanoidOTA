@@ -108,11 +108,35 @@ public class Utils {
     public static PackageInfo[] sPackageInfosGapps = new PackageInfo[0];
     private static Typeface sRobotoThin;
 
+    /**
+     * The information to be passed on between the components of the application
+     * as a part of a notification.
+     */
     public static class NotificationInfo implements Serializable {
+        private static final long serialVersionUID = -9013072595529661176L;
 
-        public int mNotificationId;
-        public PackageInfo[] mPackageInfosRom;
-        public PackageInfo[] mPackageInfosGapps;
+        /** The ID of the current notification in question. */
+        public final int mNotificationId;
+
+        /** Information about the ROM packages in the latest update. */
+        public final PackageInfo[] mRomPackages;
+
+        /** Information about the GApps packages gathered in the latest update. */
+        public final PackageInfo[] mGappsPackages;
+
+        /**
+         * Initializes an information object.
+         * 
+         * @param notificationId the ID of the displayed notification
+         * @param romPackages information about ROM packages
+         * @param gappsPackages information about the GApps packages
+         */
+        public NotificationInfo(int notificationId, PackageInfo[] romPackages,
+                PackageInfo[] gappsPackages) {
+            mNotificationId = notificationId;
+            mRomPackages = romPackages;
+            mGappsPackages = gappsPackages;
+        }
     }
 
     public static String getProp(String prop) {
@@ -287,11 +311,8 @@ public class Utils {
         }
 
         Intent intent = new Intent(context, MainActivity.class);
-        NotificationInfo fileInfo = new NotificationInfo();
-        fileInfo.mNotificationId = Updater.NOTIFICATION_ID;
-        fileInfo.mPackageInfosRom = infosRom;
-        fileInfo.mPackageInfosGapps = infosGapps;
-        intent.putExtra(FILES_INFO, fileInfo);
+        intent.putExtra(FILES_INFO, new NotificationInfo(Updater.NOTIFICATION_ID, infosRom,
+                infosGapps));
         PendingIntent pIntent = PendingIntent.getActivity(context, Updater.NOTIFICATION_ID, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 

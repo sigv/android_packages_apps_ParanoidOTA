@@ -216,8 +216,8 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
                 if (mNotificationInfo.mNotificationId != Updater.NOTIFICATION_ID) {
                     checkUpdates();
                 } else {
-                    mRomUpdater.setLastUpdates(mNotificationInfo.mPackageInfosRom);
-                    mGappsUpdater.setLastUpdates(mNotificationInfo.mPackageInfosGapps);
+                    mRomUpdater.setLastUpdates(mNotificationInfo.mRomPackages);
+                    mGappsUpdater.setLastUpdates(mNotificationInfo.mGappsPackages);
                 }
             } else {
                 checkUpdates();
