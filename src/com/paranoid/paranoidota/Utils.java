@@ -45,6 +45,7 @@ import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Properties;
@@ -402,41 +403,67 @@ public class Utils {
         }
     }
 
+    /**
+     * Attempts to execute a system command. This is a magical call that
+     * interacts with the runtime and a bunch of things could go wrong here,
+     * most of which are going to be wrapped in a {@code RuntimeException}.
+     * 
+     * @param command the command to execute
+     * @return the output of the executed command
+     * @throws RuntimeException in the case of anything going horribly wrong
+     */
     public static String exec(String command) {
+        Process p = null;
+
         try {
-            Process p = Runtime.getRuntime().exec(command);
+            p = Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            throw new RuntimeException("The requested command (" + command
+                    + ") could not be executed.", e);
+        }
+
+        try {
             DataOutputStream os = new DataOutputStream(p.getOutputStream());
             os.writeBytes("sync\n");
             os.writeBytes("exit\n");
             os.flush();
-            p.waitFor();
-            return getStreamLines(p.getInputStream());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+        } catch (IOException e) {
+            throw new RuntimeException("The data output stream could not be written to.", e);
         }
-    }
-
-    private static String getStreamLines(final InputStream is) {
-        String out = null;
-        StringBuffer buffer = null;
-        final DataInputStream dis = new DataInputStream(is);
 
         try {
-            if (dis.available() > 0) {
-                buffer = new StringBuffer(dis.readLine());
-                while (dis.available() > 0) {
-                    buffer.append("\n").append(dis.readLine());
-                }
+            p.waitFor();
+        } catch (InterruptedException e) {
+            throw new RuntimeException("The wait for the requested process was interrupted.", e);
+        }
+
+        final InputStream is = p.getInputStream();
+        final DataInputStream dis = new DataInputStream(is);
+
+        StringBuffer buffer = new StringBuffer();
+
+        try {
+            while (dis.available() > 0) {
+                buffer.append("\n").append(dis.readLine());
             }
+        } catch (IOException e) {
+            throw new RuntimeException("The data input stream could not be read.", e);
+        }
+
+        try {
             dis.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException("The data input stream could not be closed.", e);
         }
-        if (buffer != null) {
-            out = buffer.toString();
+
+        String output = buffer.toString();
+        while (output.startsWith("\n")) {
+            output = output.substring(1);
         }
-        return out;
+        while (output.endsWith("\n")) {
+            output = output.substring(0, output.length() - 1);
+        }
+        return output;
     }
 
     /**
