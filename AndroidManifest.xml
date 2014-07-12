@@ -19,7 +19,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.paranoid.paranoidota"
+    package="com.paranoid.paranoidota.signalv"
     android:versionCode="21"
     android:versionName="2.1" >
 
@@ -51,21 +51,21 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.SettingsActivity" >
+        <activity android:name="com.paranoid.paranoidota.activities.SettingsActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.paranoid.paranoidota.MainActivity" />
         </activity>
 
         <activity
-            android:name=".activities.SystemActivity"
+            android:name="com.paranoid.paranoidota.activities.SystemActivity"
             android:theme="@android:style/Theme.Holo.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.RequestFileActivity"
+        <activity android:name="com.paranoid.paranoidota.activities.RequestFileActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <receiver android:name="com.paranoid.paranoidota.NotificationAlarm" />

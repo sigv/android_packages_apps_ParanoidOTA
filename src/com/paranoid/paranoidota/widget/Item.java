@@ -33,7 +33,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 
 public class Item extends LinearLayout {
 

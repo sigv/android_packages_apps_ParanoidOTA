@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.paranoid.paranoidota.helpers.SettingsHelper;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.Updater;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 

@@ -25,7 +25,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
 import com.paranoid.paranoidota.widget.Card;

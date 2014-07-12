@@ -35,7 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.URLStringReader;
 import com.paranoid.paranoidota.URLStringReader.URLStringReaderListener;
 import com.paranoid.paranoidota.Utils;

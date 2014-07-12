@@ -57,6 +57,7 @@ import com.paranoid.paranoidota.helpers.DownloadHelper;
 import com.paranoid.paranoidota.helpers.DownloadHelper.DownloadCallback;
 import com.paranoid.paranoidota.helpers.RebootHelper;
 import com.paranoid.paranoidota.helpers.RecoveryHelper;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
 import com.paranoid.paranoidota.updater.Updater;

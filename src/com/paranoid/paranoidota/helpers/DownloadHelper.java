@@ -31,7 +31,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 
 import com.paranoid.paranoidota.IOUtils;
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 
 import java.io.BufferedInputStream;
 import java.io.File;

@@ -21,7 +21,7 @@ package com.paranoid.paranoidota.updater;
 
 import android.content.Context;
 
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.helpers.SettingsHelper;

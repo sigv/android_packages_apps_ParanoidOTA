@@ -32,7 +32,7 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 
 import com.paranoid.paranoidota.IOUtils;
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 
 import java.io.File;
 import java.io.Serializable;

@@ -33,7 +33,7 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
 import com.paranoid.paranoidota.IOUtils;
-import com.paranoid.paranoidota.R;
+import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.activities.RequestFileActivity;
 import com.paranoid.paranoidota.activities.RequestFileActivity.RequestFileCallback;
