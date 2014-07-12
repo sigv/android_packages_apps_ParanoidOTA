@@ -187,20 +187,37 @@ public class Utils {
         }
     }
 
+    /**
+     * Looks up a translation for the device name.
+     * 
+     * @param context the current context to be used in lookup
+     * @param device the device name which should be translated
+     * @return the device name translated as well as possible, being returned as
+     *         it was passed in in the worst case scenario
+     */
     public static String translateDeviceName(Context context, String device) {
-        Properties dictionary = IOUtils.getDictionary(context);
-        String translate = dictionary.getProperty(device);
-        if (translate == null) {
-            translate = device;
-            String[] remove = dictionary.getProperty("@remove").split(",");
-            for (int i = 0; i < remove.length; i++) {
-                if (translate.indexOf(remove[i]) >= 0) {
-                    translate = translate.replace(remove[i], "");
-                    break;
-                }
+        if (context == null) {
+            throw new IllegalArgumentException("The context cannot be a null value.");
+        }
+        if (device == null) {
+            return "null";
+        }
+
+        final Properties dictionary = IOUtils.getDictionary(context);
+
+        final String translation = dictionary.getProperty(device);
+        if (translation != null) {
+            return translation;
+        }
+
+        for (String removable : dictionary.getProperty("@remove").split(",")) {
+            if (device.contains(removable)) {
+                device = device.replace(removable, "");
+                break;
             }
         }
-        return translate;
+
+        return device;
     }
 
     public static String getDateAndTime() {
