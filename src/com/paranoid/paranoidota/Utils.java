@@ -286,21 +286,38 @@ public class Utils {
                 NotificationAlarm.class), PendingIntent.FLAG_NO_CREATE) != null);
     }
 
-    public static void showToastOnUiThread(final Context context, final int resourceId) {
-        ((Activity) context).runOnUiThread(new Runnable() {
+    /**
+     * Displays a toast notification.
+     * 
+     * @param activity the activity to use for displaying the toast
+     * @param resourceId the ID of the string resource to be used as the
+     *            notification text
+     */
+    public static void showToast(final Activity activity, final int resourceId) {
+        if (activity == null) {
+            throw new IllegalArgumentException("The activity cannot be a null value.");
+        }
 
-            public void run() {
-                Toast.makeText(context, resourceId, Toast.LENGTH_LONG).show();
-            }
-        });
+        showToast(activity, activity.getResources().getString(resourceId));
     }
 
-    public static void showToastOnUiThread(final Context context, final String string) {
-        ((Activity) context).runOnUiThread(new Runnable() {
+    /**
+     * Displays a toast notification.
+     * 
+     * @param activity the activity to use for displaying the toast
+     * @param resourceId the notification text
+     */
+    public static void showToast(final Activity activity, final String text) {
+        if (activity == null) {
+            throw new IllegalArgumentException("The context cannot be a null value.");
+        }
+
+        activity.runOnUiThread(new Runnable() {
 
             public void run() {
-                Toast.makeText(context, string, Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, text, Toast.LENGTH_LONG).show();
             }
+
         });
     }
 

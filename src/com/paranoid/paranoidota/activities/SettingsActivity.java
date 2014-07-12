@@ -91,7 +91,7 @@ public class SettingsActivity extends PreferenceActivity implements
             if (mSettingsHelper.isLogged()) {
                 mSettingsHelper.logout();
                 updateSummaries();
-                Utils.showToastOnUiThread(this, R.string.logged_out);
+                Utils.showToast(this, R.string.logged_out);
             } else {
                 showLoginDialog();
             }
@@ -178,16 +178,16 @@ public class SettingsActivity extends PreferenceActivity implements
                                     progressDialog.dismiss();
                                     if (buffer != null && buffer.length() == 32) {
                                         mSettingsHelper.login(buffer);
-                                        Utils.showToastOnUiThread(
+                                        Utils.showToast(
                                                 SettingsActivity.this,
                                                 getResources().getString(R.string.logged_in,
                                                         mSettingsHelper.getLoginUserName()));
                                         updateSummaries();
                                     } else if (buffer != null) {
-                                        Utils.showToastOnUiThread(SettingsActivity.this,
+                                        Utils.showToast(SettingsActivity.this,
                                                 R.string.error_logging_invalid);
                                     } else {
-                                        Utils.showToastOnUiThread(SettingsActivity.this,
+                                        Utils.showToast(SettingsActivity.this,
                                                 R.string.error_logging_down);
                                     }
                                 }
@@ -196,7 +196,7 @@ public class SettingsActivity extends PreferenceActivity implements
                                 public void onReadError(Exception ex) {
                                     progressDialog.dismiss();
                                     ex.printStackTrace();
-                                    Utils.showToastOnUiThread(SettingsActivity.this,
+                                    Utils.showToast(SettingsActivity.this,
                                             R.string.error_logging_in);
                                 }
 

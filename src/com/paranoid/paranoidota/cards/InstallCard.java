@@ -145,7 +145,12 @@ public class InstallCard extends Card implements RequestFileCallback {
     @Override
     public void fileRequested(String filePath) {
         if (filePath == null) {
-            Utils.showToastOnUiThread(getContext(), R.string.file_not_found);
+            Context context = getContext();
+            if (context instanceof Activity) {
+                Utils.showToast((Activity) context, R.string.file_not_found);
+            } else {
+                throw new IllegalArgumentException("The file path cannot be a null value.");
+            }
         } else {
             addFile(new File(filePath), null);
         }

@@ -235,12 +235,17 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
             return true;
         }
         if (!mFromAlarm && !mServerWorks) {
-            int id = getErrorStringId();
+            Context context = getContext();
+
+            String text = context.getResources().getString(getErrorStringId());
             if (error != null) {
-                Utils.showToastOnUiThread(getContext(), getContext().getResources().getString(id)
-                        + ": " + error);
+                text += ": " + error;
+            }
+
+            if (context instanceof Activity) {
+                Utils.showToast((Activity) context, text);
             } else {
-                Utils.showToastOnUiThread(getContext(), id);
+                throw new RuntimeException("Updater was passed an version error (" + text + ").");
             }
         }
         mCurrentServer = -1;
