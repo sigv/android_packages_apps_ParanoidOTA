@@ -439,22 +439,33 @@ public class Utils {
         return out;
     }
 
+    /**
+     * Sets the font of the specified view to Roboto Thin/Light.
+     * 
+     * @param context the context to use for loading the typeface, if needed
+     * @param view the {@code ViewGroup} or {@code TextView} to work with
+     */
     public static void setRobotoThin(Context context, View view) {
-        if (sRobotoThin == null) {
-            sRobotoThin = Typeface.createFromAsset(context.getAssets(),
-                    "Roboto-Light.ttf");
-        }
-        setFont(view, sRobotoThin);
+        setTypefaceRecursively(
+                sRobotoThin == null ? (sRobotoThin = Typeface.createFromAsset(context.getAssets(),
+                        "Roboto-Light.ttf")) : sRobotoThin, view);
     }
 
-    private static void setFont(View view, Typeface robotoTypeFace) {
+    /**
+     * Sets the font of the view in a recursive manner.
+     * 
+     * @param typeface the typeface to use as replacement
+     * @param view the {@code ViewGroup} or {@code TextView} to work with
+     */
+    private static void setTypefaceRecursively(Typeface typeface, View view) {
         if (view instanceof ViewGroup) {
-            int count = ((ViewGroup) view).getChildCount();
+            final int count = ((ViewGroup) view).getChildCount();
             for (int i = 0; i < count; i++) {
-                setFont(((ViewGroup) view).getChildAt(i), robotoTypeFace);
+                setTypefaceRecursively(typeface, ((ViewGroup) view).getChildAt(i));
             }
         } else if (view instanceof TextView) {
-            ((TextView) view).setTypeface(robotoTypeFace);
+            ((TextView) view).setTypeface(typeface);
         }
     }
+
 }
