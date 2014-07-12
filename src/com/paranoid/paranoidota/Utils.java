@@ -322,70 +322,68 @@ public class Utils {
         });
     }
 
-    public static void showNotification(Context context, Updater.PackageInfo[] infosRom,
-            Updater.PackageInfo[] infosGapps) {
-        Resources resources = context.getResources();
-
-        if (infosRom != null) {
-            sPackageInfosRom = infosRom;
-        } else {
-            infosRom = sPackageInfosRom;
+    /**
+     * Displays a notification.
+     * 
+     * @param context the context to use for the creation of the notification
+     * @param romInfo the information about the ROM packages
+     * @param gappsInfo the information about the GApps packages
+     */
+    public static void showNotification(Context context, Updater.PackageInfo[] romInfo,
+            Updater.PackageInfo[] gappsInfo) {
+        if (romInfo != null) {
+            sPackageInfosRom = romInfo;
         }
-        if (infosGapps != null) {
-            sPackageInfosGapps = infosGapps;
-        } else {
-            infosGapps = sPackageInfosGapps;
-        }
+        romInfo = sPackageInfosRom;
 
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra(FILES_INFO, new NotificationInfo(Updater.NOTIFICATION_ID, infosRom,
-                infosGapps));
-        PendingIntent pIntent = PendingIntent.getActivity(context, Updater.NOTIFICATION_ID, intent,
+        if (gappsInfo != null) {
+            sPackageInfosGapps = gappsInfo;
+        }
+        gappsInfo = sPackageInfosGapps;
+
+        final Resources res = context.getResources();
+
+        final PendingIntent intent = PendingIntent.getActivity(context, Updater.NOTIFICATION_ID,
+                new Intent(context, MainActivity.class).putExtra(FILES_INFO, new NotificationInfo(
+                        Updater.NOTIFICATION_ID, romInfo, gappsInfo)),
                 PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                .setContentTitle(resources.getString(R.string.new_system_update))
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setContentTitle(res.getString(R.string.new_system_update))
                 .setSmallIcon(R.drawable.ic_launcher_mono)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_launcher))
-                .setContentIntent(pIntent);
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_launcher))
+                .setContentIntent(intent);
 
-        String contextText = "";
-        if (infosRom.length + infosGapps.length == 1) {
-            String filename = infosRom.length == 1 ? infosRom[0].getFilename() : infosGapps[0]
-                    .getFilename();
-            contextText = resources.getString(R.string.new_package_name, new Object[] {
-                    filename
-            });
-        } else {
-            contextText = resources.getString(R.string.new_packages, new Object[] {
-                    infosRom.length
-                            + infosGapps.length
-            });
-        }
+        final String contextText = (romInfo.length + gappsInfo.length == 1) ?
+                res.getString(R.string.new_package_name,
+                        new Object[] {
+                            romInfo.length == 1 ? romInfo[0].getFilename() : gappsInfo[0]
+                                    .getFilename()
+                        }) :
+                res.getString(R.string.new_packages, new Object[] {
+                        romInfo.length + gappsInfo.length
+                });
         builder.setContentText(contextText);
 
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        final NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle(context.getResources().getString(R.string.new_system_update));
-        if (infosRom.length + infosGapps.length > 1) {
+        if (romInfo.length + gappsInfo.length > 1) {
             inboxStyle.addLine(contextText);
         }
-        for (int i = 0; i < infosRom.length; i++) {
-            inboxStyle.addLine(infosRom[i].getFilename());
+        for (int i = 0; i < romInfo.length; i++) {
+            inboxStyle.addLine(romInfo[i].getFilename());
         }
-        for (int i = 0; i < infosGapps.length; i++) {
-            inboxStyle.addLine(infosGapps[i].getFilename());
+        for (int i = 0; i < gappsInfo.length; i++) {
+            inboxStyle.addLine(gappsInfo[i].getFilename());
         }
-        inboxStyle.setSummaryText(resources.getString(R.string.app_name));
+        inboxStyle.setSummaryText(res.getString(R.string.app_name));
         builder.setStyle(inboxStyle);
 
-        Notification notif = builder.build();
+        final Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-        NotificationManager notificationManager = (NotificationManager) context
-                .getSystemService(Service.NOTIFICATION_SERVICE);
-
-        notif.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        notificationManager.notify(Updater.NOTIFICATION_ID, notif);
+        ((NotificationManager) context
+                .getSystemService(Service.NOTIFICATION_SERVICE)).notify(Updater.NOTIFICATION_ID,
+                notification);
     }
 
     /**
