@@ -32,7 +32,7 @@ public class TwrpRecovery extends RecoveryInfo {
     public TwrpRecovery() {
         super();
 
-        setId(Utils.TWRP);
+        setId(Utils.RecoveryType.TWRP.mId);
         setName("twrp");
         setInternalSdcard("sdcard");
         setExternalSdcard("external_sd");

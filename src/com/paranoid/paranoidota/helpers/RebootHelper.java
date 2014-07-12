@@ -198,7 +198,7 @@ public class RebootHelper {
             f.delete();
 
             int[] recoveries = new int[] {
-                    Utils.TWRP, Utils.CWM_BASED
+                    Utils.RecoveryType.TWRP.mId, Utils.RecoveryType.CWM_BASED.mId
             };
 
             for (int i = 0; i < recoveries.length; i++) {

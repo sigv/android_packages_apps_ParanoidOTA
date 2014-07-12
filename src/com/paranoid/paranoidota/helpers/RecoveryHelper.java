@@ -37,8 +37,8 @@ public class RecoveryHelper {
 
         mContext = context;
 
-        mRecoveries.put(Utils.CWM_BASED, new CwmBasedRecovery(context));
-        mRecoveries.put(Utils.TWRP, new TwrpRecovery());
+        mRecoveries.put(Utils.RecoveryType.CWM_BASED.mId, new CwmBasedRecovery(context));
+        mRecoveries.put(Utils.RecoveryType.TWRP.mId, new TwrpRecovery());
     }
 
     public RecoveryInfo getRecovery(int id) {

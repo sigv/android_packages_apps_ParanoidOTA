@@ -35,7 +35,7 @@ public class CwmBasedRecovery extends RecoveryInfo {
     public CwmBasedRecovery(Context context) {
         super();
 
-        setId(Utils.CWM_BASED);
+        setId(Utils.RecoveryType.CWM_BASED.mId);
         setName("cwmbased");
         setInternalSdcard(internalStorage());
         setExternalSdcard(externalStorage(context));

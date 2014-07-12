@@ -63,11 +63,46 @@ public class Utils {
     public static final String CHECK_DOWNLOADS_ID = "com.paranoid.paranoidota.Utils.CHECK_DOWNLOADS_ID";
     public static final String MOD_VERSION = "ro.modversion";
     public static final String RO_PA_VERSION = "ro.pa.version";
-    public static final int ROM_ALARM_ID = 122303221;
-    public static final int GAPPS_ALARM_ID = 122303222;
 
-    public static final int TWRP = 1;
-    public static final int CWM_BASED = 2;
+    /** The different alarm types. */
+    public static enum AlarmType {
+        /** The alarm for the ROM. */
+        ROM(122303221),
+        /** The alarm for the Google apps. */
+        GAPPS(122303222);
+
+        /** The private request code for use with the alarm broadcast. */
+        public final int mId;
+
+        /**
+         * Initializes an alarm type.
+         * 
+         * @param id the private request code
+         */
+        private AlarmType(final int id) {
+            mId = id;
+        }
+    }
+
+    /** The different recovery types. */
+    public static enum RecoveryType {
+        /** The recovery type for TWRP. */
+        TWRP(1),
+        /** The recovery type for all CWM-based recoveries. */
+        CWM_BASED(2);
+
+        /** The internal identifier assigned to the recovery. */
+        public final int mId;
+
+        /**
+         * Initializes a recovery type.
+         * 
+         * @param id the internal identifier
+         */
+        private RecoveryType(final int id) {
+            mId = id;
+        }
+    }
 
     public static PackageInfo[] sPackageInfosRom = new PackageInfo[0];
     public static PackageInfo[] sPackageInfosGapps = new PackageInfo[0];
@@ -201,7 +236,7 @@ public class Utils {
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         PendingIntent pi = PendingIntent.getBroadcast(context,
-                isRom ? ROM_ALARM_ID : GAPPS_ALARM_ID, i,
+                isRom ? AlarmType.ROM.mId : AlarmType.GAPPS.mId, i,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -212,8 +247,8 @@ public class Utils {
     }
 
     public static boolean alarmExists(Context context, boolean isRom) {
-        return (PendingIntent.getBroadcast(context, isRom ? ROM_ALARM_ID
-                : GAPPS_ALARM_ID, new Intent(context, NotificationAlarm.class),
+        return (PendingIntent.getBroadcast(context, isRom ? AlarmType.ROM.mId
+                : AlarmType.GAPPS.mId, new Intent(context, NotificationAlarm.class),
                 PendingIntent.FLAG_NO_CREATE) != null);
     }
 
