@@ -119,7 +119,7 @@ public class Version implements Serializable {
                 mMajor = Integer.parseInt(version);
             }
 
-            if (!Utils.isNumeric(split[2].substring(0, 1))) {
+            if (!Utils.isDouble(split[2].substring(0, 1))) {
                 version = split[2];
                 if (version.startsWith("A")) {
                     mPhase = ALPHA;

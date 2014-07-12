@@ -387,13 +387,19 @@ public class Utils {
         notificationManager.notify(Updater.NOTIFICATION_ID, notif);
     }
 
-    public static boolean isNumeric(String str) {
+    /**
+     * Checks whether the string passed in is a number.
+     * 
+     * @param s the string to evaluate
+     * @return {@code true} if the string can be parsed as a {@code double}
+     */
+    public static boolean isDouble(String s) {
         try {
-            Double.parseDouble(str);
+            Double.parseDouble(s);
             return true;
         } catch (NumberFormatException ex) {
+            return false;
         }
-        return false;
     }
 
     public static String exec(String command) {

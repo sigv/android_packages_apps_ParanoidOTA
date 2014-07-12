@@ -89,8 +89,8 @@ public class GooServer implements Server {
                 if (!isNew) {
                     if (!mIsRom) {
                         String part = parts[parts.length - 1];
-                        isNew = Utils.isNumeric(part)
-                                || Utils.isNumeric(part.substring(0,
+                        isNew = Utils.isDouble(part)
+                                || Utils.isDouble(part.substring(0,
                                         part.length() - 1));
                         if (!isNew) {
                             continue;
