@@ -309,7 +309,7 @@ public class Utils {
      */
     public static void showToast(final Activity activity, final String text) {
         if (activity == null) {
-            throw new IllegalArgumentException("The context cannot be a null value.");
+            throw new IllegalArgumentException("The activity cannot be a null value.");
         }
 
         activity.runOnUiThread(new Runnable() {
@@ -446,9 +446,16 @@ public class Utils {
      * @param view the {@code ViewGroup} or {@code TextView} to work with
      */
     public static void setRobotoThin(Context context, View view) {
-        setTypefaceRecursively(
-                sRobotoThin == null ? (sRobotoThin = Typeface.createFromAsset(context.getAssets(),
-                        "Roboto-Light.ttf")) : sRobotoThin, view);
+        if (sRobotoThin == null) {
+            if (context == null) {
+                throw new IllegalArgumentException("The context cannot be a null value.");
+            }
+
+            sRobotoThin = Typeface.createFromAsset(context.getAssets(),
+                    "Roboto-Light.ttf");
+        }
+
+        setTypefaceRecursively(sRobotoThin, view);
     }
 
     /**
