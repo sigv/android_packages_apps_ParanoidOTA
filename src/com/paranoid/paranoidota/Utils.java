@@ -43,12 +43,9 @@ import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.Updater;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -139,21 +136,30 @@ public class Utils {
         }
     }
 
+    /**
+     * Attempts to get the requested system property. It should be expected that
+     * if the underlying calls fail for any reason, null is to be returned
+     * instead to the caller.
+     * 
+     * @param prop the name of the property
+     * @return the value of the property or null in case of failure
+     */
     public static String getProp(String prop) {
-        try {
-            Process process = Runtime.getRuntime().exec("getprop " + prop);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                    process.getInputStream()));
-            StringBuilder log = new StringBuilder();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                log.append(line);
-            }
-            return log.toString();
-        } catch (IOException e) {
-            // Runtime error
+        if (prop == null) {
+            throw new IllegalArgumentException("The property name cannot be a null value.");
         }
-        return null;
+
+        String out = exec("getprop " + prop);
+        if (out == null) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String s : out.split("\n")) {
+            sb.append(s);
+        }
+
+        return sb.toString();
     }
 
     /**
