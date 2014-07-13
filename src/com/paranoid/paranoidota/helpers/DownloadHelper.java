@@ -283,11 +283,7 @@ public class DownloadHelper {
                 new Object[] {
                     fileName
                 }));
-        File file = new File(IOUtils.DOWNLOAD_PATH);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        request.setDestinationUri(Uri.fromFile(new File(IOUtils.DOWNLOAD_PATH, fileName)));
+        request.setDestinationUri(Uri.fromFile(new File(IOUtils.getDownloadsDirectory(), fileName)));
 
         long id = sDownloadManager.enqueue(request);
         if (isRom) {

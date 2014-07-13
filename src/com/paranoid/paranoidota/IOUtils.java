@@ -34,10 +34,6 @@ import java.util.Scanner;
 
 public class IOUtils {
 
-    /** The path of the directory in which the downloads should be stored. */
-    public static final String DOWNLOAD_PATH = new File(Environment.getExternalStorageDirectory(),
-            "paranoidota/").getAbsolutePath();
-
     private static Properties sDictionary;
 
     private static String sPrimarySdcard;
@@ -47,14 +43,13 @@ public class IOUtils {
     private static boolean sSdcardsChecked;
 
     public static void init(Context context) {
-        File downloads = new File(DOWNLOAD_PATH);
-        downloads.mkdirs();
+        getDownloadsDirectory();
 
         readMounts(context);
     }
 
     public static String[] getDownloadList(Context context) {
-        File downloads = initSettingsHelper(context);
+        File downloads = getDownloadsDirectory();
         ArrayList<String> list = new ArrayList<String>();
         try {
             for (File f : downloads.listFiles()) {
@@ -69,7 +64,7 @@ public class IOUtils {
     }
 
     public static String[] getDownloadSizes(Context context) {
-        File downloads = initSettingsHelper(context);
+        File downloads = getDownloadsDirectory();
         ArrayList<String> list = new ArrayList<String>();
         for (File f : downloads.listFiles()) {
             if (isRom(f.getName())) {
@@ -80,7 +75,7 @@ public class IOUtils {
     }
 
     public static String getDownloadSize(Context context, String fileName) {
-        File downloads = initSettingsHelper(context);
+        File downloads = getDownloadsDirectory();
         for (String file : getDownloadList(context)) {
             if (fileName.equals(file)) {
                 File f = new File(downloads, fileName);
@@ -306,10 +301,20 @@ public class IOUtils {
         return sDictionary;
     }
 
-    private static File initSettingsHelper(Context context) {
-        File downloads = new File(DOWNLOAD_PATH);
-        downloads.mkdirs();
-        return downloads;
+    /**
+     * @return the downloads directory object for use right away
+     * @throws RuntimeException in the case that the directory creation fails
+     *             for any reason and there is no preferred directory to use
+     */
+    public static File getDownloadsDirectory() {
+        final File dir = new File(Environment.getExternalStorageDirectory(), "paranoidota/");
+        dir.mkdirs();
+
+        if (!dir.isDirectory()) {
+            throw new RuntimeException("The download directory is not initialized.");
+        }
+
+        return dir;
     }
 
     public static boolean hasAndroidSecure() {
