@@ -470,6 +470,21 @@ public final class Version implements Comparable<Version> {
         return compareTo(another) >= 0;
     }
 
+    /** @return a formatted string for displaying to the user */
+    public String toDisplayString() {
+        String out = mMajorVersion + "." + mMinorVersion + "." + mPatchVersion;
+
+        for (final String part : mPreReleaseVersion) {
+            out += "-" + part;
+        }
+
+        for (final String part : mBuildMetadata) {
+            out += "-" + part;
+        }
+
+        return out;
+    }
+
     @Override
     public String toString() {
         return getClass().getName() + "[" + "majorVersion=" + mMajorVersion + ", "

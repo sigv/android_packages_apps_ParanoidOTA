@@ -42,11 +42,12 @@ public class SystemCard extends Card {
         Resources res = context.getResources();
 
         TextView romView = (TextView) findLayoutViewById(R.id.rom);
-        romView.setText(res.getString(R.string.system_rom, romUpdater.getVersion().toString()));
+        romView.setText(res.getString(R.string.system_rom, romUpdater.getVersion()
+                .toDisplayString()));
 
         TextView gappsView = (TextView) findLayoutViewById(R.id.gapps);
         gappsView.setText(res.getString(R.string.system_gapps, gappsUpdater.getType(), gappsUpdater
-                .getVersion().toString()));
+                .getVersion().toDisplayString()));
     }
 
     @Override
