@@ -50,7 +50,7 @@ public class RomUpdater extends Updater {
 
     @Override
     public Version getVersion() {
-        return new Version(getVersionString(getContext()));
+        return Version.parseSafePA(getVersionString(getContext()));
     }
 
     @Override

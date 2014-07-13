@@ -19,215 +19,463 @@
 
 package com.paranoid.paranoidota;
 
-import java.io.Serializable;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Class to manage different versions in the zip name.
- * <p>
- * Format<br>
- * pa_A-B-C.DE-FG-H.zip<br>
- * where<br>
- * A = device name, required<br>
- * B = extra information, not required (for gapps)<br>
- * C = major, integer from 0 to n, required<br>
- * D = minor, integer from 0 to 9, required<br>
- * E = maintenance, integer from 0 to n, not required<br>
- * F = phase, possible values are A, B or RC, not required, default is
- * gold/production<br>
- * G = phase number, integer from 0 to n, not required<br>
- * H = date, YYYYMMDD, not required, the format can be YYYYMMDDx where x is a
- * letter (for gapps)
- * <p>
- * All the default values not specified above are 0
- * <p>
- * Examples<br>
- * pa_find5-3.99-RC2-20140212.zip<br>
- * pa_gapps-modular-mini-4.3-20141010-signed.zip
+ * The version meta-data object. This implementation follows the Semantic
+ * Versioning Specification (SemVer) 2.0.0.
  */
-public class Version implements Serializable {
+public final class Version implements Comparable<Version> {
 
-    private final String[] STATIC_REMOVE = {
-            ".zip", "pa_"
-    };
-    private final String[] PHASES = {
-            "ALPHA", "BETA", "RC", ""
-    };
+    /** @hide */
+    private static final String PA_PHASE_ARRAY_MARKER = "phase";
 
-    private static final String SEPARATOR = "-";
+    /** The semi-capturing group for the build meta-data. */
+    private static final String PATTERN_BUILD_METADATA_GROUP;
 
-    private static final int ALPHA = 0;
-    private static final int BETA = 1;
-    private static final int RELEASE_CANDIDATE = 2;
-    private static final int GOLD = 3;
+    /** The semi-capturing group for the pre-release version. */
+    private static final String PATTERN_PRE_RELEASE_VERSION_GROUP;
 
-    private String mDevice;
-    private int mMajor = 0;
-    private int mMinor = 0;
-    private int mMaintenance = 0;
-    private int mPhase = GOLD;
-    private int mPhaseNumber = 0;
-    private String mDate = "0";
+    /** Logging tag for the class. */
+    private static final String TAG = "Version";
 
-    public Version() {
+    static {
+        /*
+         * The capturing identifier group consists of unlimited count of ASCII
+         * characters split in groups. A dot is used as a group seperator.
+         */
+        final String identifierGroup = "([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)";
+
+        PATTERN_PRE_RELEASE_VERSION_GROUP = "(?:-" + identifierGroup + ")?";
+        PATTERN_BUILD_METADATA_GROUP = "(?:\\+" + identifierGroup + ")?";
     }
 
-    public Version(String fileName) {
+    /**
+     * Parses PA package version meta-data into a SemVer-style version object.
+     * <p>
+     * In general, PA follows <i>pa_A-B-C.DE-FG-H.zip</i> where:<br>
+     * A - device name, string<br>
+     * B - optional device extras, string<br>
+     * C - major version number, integer<br>
+     * D - minor version number, single digit<br>
+     * E - optional maintenance version number, integer<br>
+     * F - optional development phase, string<br>
+     * G - optional development phase number, integer<br>
+     * H - optional release date, string
+     * <p>
+     * When generating the SemVer object:<br>
+     * The device name and extras are held separately and do not affect the
+     * SemVer object. The major, minor and maintenance versions are used as
+     * major, minor and patch versions respectively with the maintenance/patch
+     * version defaulting to 0 if not specified. The pre-release version
+     * consists of up to 4 identifiers. The first one is based on the
+     * development phase string transformed to an integer to allow comparisons.
+     * The development phase number, which defaults to 0 if not specified, is
+     * the next identifier. The release date is then appended as the third
+     * identifier. If the release date contains a padding letter, that is
+     * stripped and added as the fourth identifier. Some of these identifiers
+     * may remain empty and be stripped automatically.
+     * 
+     * @param version the PA package version meta-data
+     * @return the parsed SemVer object
+     * @throws IllegalArgumentException in case the input meta-data is invalid
+     */
+    public static Version parsePA(final String version) throws IllegalArgumentException {
+        final Matcher m = Pattern
+                .compile(
+                        "pa_(.+(?:-.+)?)-(\\d+)\\.(\\d)(?:(\\d+))?(-\\w+)?(-\\w+)?(?:-signed)?(?:\\.zip)?")
+                .matcher(version);
 
-        for (String remove : STATIC_REMOVE) {
-            fileName = fileName.replace(remove, "");
+        if (!m.find(0)) {
+            throw new IllegalArgumentException("PA specification unmatched for " + version + ".");
         }
 
-        String[] split = fileName.split(SEPARATOR);
-
-        mDevice = split[0];
-
-        // remove gapps extra names (modular, full, mini, etc)
-        while (split[1].matches("\\w+\\.?")) {
-            String[] newSplit = new String[split.length - 1];
-            newSplit[0] = split[0];
-            for (int i = 2; i < split.length; i++) {
-                newSplit[i - 1] = split[i];
-            }
-            split = newSplit;
-            if (split.length <= 1) {
-                break;
-            }
-        }
-
-        if (split.length <= 1) {
-            // malformed version
-            return;
+        if (m.start() != 0 || m.end() != version.length()) {
+            throw new IllegalArgumentException("PA specification with unexpected padding for "
+                    + version + ".");
         }
 
         try {
-            String version = split[1];
-            int index = -1;
-            if ((index = version.indexOf(".")) > 0) {
-                mMajor = Integer.parseInt(version.substring(0, index));
-                version = version.substring(index + 1);
-                if (version.length() > 0) {
-                    mMinor = Integer.parseInt(version.substring(0, 1));
-                }
-                if (version.length() > 1) {
-                    String maintenance = version.substring(1);
-                    if (maintenance.startsWith(".")) {
-                        maintenance = maintenance.substring(1);
-                    }
-                    mMaintenance = Integer.parseInt(maintenance);
-                }
-            } else {
-                mMajor = Integer.parseInt(version);
+            // m.group(1) is the device name
+
+            final int majorVersion = Integer.parseInt(m.group(2), 10);
+            final int minorVersion = Integer.parseInt(m.group(3), 10);
+            final int maintenanceVersion = Integer.parseInt(swapNull(m.group(4), "0"), 10);
+
+            String[] trailingOne = parsePATrailingValue(swapNull(m.group(5), ""));
+            String[] trailingTwo = parsePATrailingValue(swapNull(m.group(6), ""));
+
+            if (trailingOne[0].equals(PA_PHASE_ARRAY_MARKER)) {
+                final String[] temporaryStore = trailingOne;
+                trailingOne = trailingTwo;
+                trailingTwo = temporaryStore;
             }
 
-            if (!Utils.isDouble(split[2].substring(0, 1))) {
-                version = split[2];
-                if (version.startsWith("A")) {
-                    mPhase = ALPHA;
-                    if (version.startsWith("ALPHA")) {
-                        version = version.substring(5);
-                    } else {
-                        version = version.substring(1);
-                    }
-                } else if (version.startsWith("B")) {
-                    mPhase = BETA;
-                    if (version.startsWith("BETA")) {
-                        version = version.substring(4);
-                    } else {
-                        version = version.substring(1);
-                    }
-                } else if (version.startsWith("RC")) {
-                    mPhase = RELEASE_CANDIDATE;
-                    version = version.substring(2);
-                }
-                if (!version.isEmpty()) {
-                    mPhaseNumber = Integer.parseInt(version);
-                }
-                mDate = split[3];
-            } else {
-                mDate = split[2];
+            if (trailingOne.length < 2 || trailingTwo.length < 2) {
+                throw new IllegalArgumentException(
+                        "PA specification hit two unfilled trailing values for " + version + ".");
             }
-        } catch (NumberFormatException ex) {
-            // malformed version, write the log and continue
-            // C derped something for sure
-            ex.printStackTrace();
+
+            final ArrayList<String> identifiers = new ArrayList<String>();
+
+            for (final String identifier : new String[] {
+                    trailingOne[trailingOne.length - 2], trailingOne[trailingOne.length - 1],
+                    trailingTwo[trailingTwo.length - 2], trailingTwo[trailingTwo.length - 1]
+            }) {
+                if (identifier.length() > 0) {
+                    identifiers.add(identifier);
+                }
+            }
+
+            return new Version(majorVersion, minorVersion, maintenanceVersion,
+                    identifiers.toArray(new String[identifiers.size()]), new String[] {});
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("PA specification hit an unexpected non-number for "
+                    + version + ".");
         }
     }
 
-    public String getDevice() {
-        return mDevice;
-    }
+    /** @hide */
+    private static String[] parsePATrailingValue(String input) {
+        final String alphaIdentifier = "1";
+        final String betaIdentifier = "2";
+        final String rcIdentifier = "3";
+        final String goldIdentifier = "4";
 
-    public int getMajor() {
-        return mMajor;
-    }
-
-    public int getMinor() {
-        return mMinor;
-    }
-
-    public int getMaintenance() {
-        return mMaintenance;
-    }
-
-    public int getPhase() {
-        return mPhase;
-    }
-
-    public String getPhaseName() {
-        return PHASES[mPhase];
-    }
-
-    public int getPhaseNumber() {
-        return mPhaseNumber;
-    }
-
-    public String getDate() {
-        return mDate;
-    }
-
-    public boolean isEmpty() {
-        return mMajor == 0;
-    }
-
-    public String toString() {
-        return toString(true);
-    }
-
-    public String toString(boolean showDevice) {
-        return (showDevice ? mDevice + " " : "")
-                + mMajor
-                + "."
-                + mMinor
-                + (mMaintenance > 0 ? "."
-                        + mMaintenance : "")
-                + (mPhase != GOLD ? " " + getPhaseName() + mPhaseNumber : "")
-                + " (" + mDate + ")";
-    }
-
-    public static Version fromGapps(String platform, String version) {
-        return new Version("gapps-" + platform.substring(0, 1) + "."
-                + (platform.length() > 1 ? platform.substring(1) : "") + "-" + version);
-    }
-
-    public static int compare(Version v1, Version v2) {
-        if (v1.getMajor() != v2.getMajor()) {
-            return v1.getMajor() < v2.getMajor() ? -1 : 1;
+        if (input.startsWith("-")) {
+            input = input.substring(1);
         }
-        if (v1.getMinor() != v2.getMinor()) {
-            return v1.getMinor() < v2.getMinor() ? -1 : 1;
+        if (input.length() == 0) {
+            // nothing specified
+            return new String[] {
+                    "", ""
+            };
+        } else if (input.substring(0, 1).matches("[0-9]")) {
+            // release date
+            try {
+                return new String[] {
+                        input.substring(0, 8), input.substring(8)
+                };
+            } catch (final IndexOutOfBoundsException e) {
+                return new String[] {
+                        input, ""
+                };
+            }
+        } else if (input.startsWith("A")) {
+            // phase ALPHA X
+            return new String[] {
+                    PA_PHASE_ARRAY_MARKER, alphaIdentifier,
+                    input.substring(input.startsWith("ALPHA") ? 5 : 1)
+            };
+        } else if (input.startsWith("B")) {
+            // phase BETA X
+            return new String[] {
+                    PA_PHASE_ARRAY_MARKER, betaIdentifier,
+                    input.startsWith("BETA") ? input.length() > 4 ? input.substring(4) : "0"
+                            : input.length() > 1 ? input.substring(1) : "0"
+            };
+        } else if (input.startsWith("RC")) {
+            // phase RC X
+            return new String[] {
+                    PA_PHASE_ARRAY_MARKER, rcIdentifier,
+                    input.length() > 2 ? input.substring(2) : "0"
+            };
+        } else {
+            // unknown - assume phase GOLD 0
+            return new String[] {
+                    PA_PHASE_ARRAY_MARKER, goldIdentifier, "0"
+            };
         }
-        if (v1.getMaintenance() != v2.getMaintenance()) {
-            return v1.getMaintenance() < v2.getMaintenance() ? -1 : 1;
+    }
+
+    /**
+     * Parses a PA package version meta-data into a SemVer-style version object.
+     * Invalid input meta-data will simply return an SemVer object with reset
+     * fields.
+     * 
+     * @param version the PA package version meta-data
+     * @return the parsed SemVer object
+     */
+    public static Version parseSafePA(final String version) {
+        try {
+            return parsePA(version);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Returning a safe version object for the PA package.", e);
+            return new Version(0, 0, 0);
         }
-        if (v1.getPhase() != v2.getPhase()) {
-            return v1.getPhase() < v2.getPhase() ? -1 : 1;
+    }
+
+    /**
+     * Makes sure the string value used is not null. Perfect for usage when a
+     * value can be returned as null, but can be substituted with another
+     * default value such as in pattern matching when groups are skipped.
+     * 
+     * @param input the original string
+     * @param def the string to use as default for input
+     * @return the input string or the default string, if the input was null
+     */
+    private static String swapNull(final String input, final String def) {
+        return input == null ? def : input;
+    }
+
+    /** The dot-separated identifiers added as build meta-data. */
+    private final String[] mBuildMetadata;
+
+    /** The major version number. */
+    private final int mMajorVersion;
+
+    /** The minor version number. */
+    private final int mMinorVersion;
+
+    /** The patch version number. */
+    private final int mPatchVersion;
+
+    /** The dot-separated identifiers added to pre-release versions. */
+    private final String[] mPreReleaseVersion;
+
+    /**
+     * Initializes a version object.
+     * 
+     * @param majorVersion the major version number
+     * @param minorVersion the minor version number
+     * @param patchVersion the patch version number
+     */
+    public Version(final int majorVersion, final int minorVersion, final int patchVersion) {
+        this(majorVersion, minorVersion, patchVersion, new String[] {}, new String[] {});
+    }
+
+    /**
+     * Initializes a version object.
+     * 
+     * @param majorVersion the major version number
+     * @param minorVersion the minor version number
+     * @param patchVersion the patch version number
+     * @param preReleaseVersion the dot-separated identifiers added to
+     *            pre-release versions
+     */
+    public Version(final int majorVersion, final int minorVersion, final int patchVersion,
+            final String[] preReleaseVersion) {
+        this(majorVersion, minorVersion, patchVersion, preReleaseVersion, new String[] {});
+    }
+
+    /**
+     * Initializes a version object.
+     * 
+     * @param majorVersion the major version number
+     * @param minorVersion the minor version number
+     * @param patchVersion the patch version number
+     * @param preReleaseVersion the dot-separated identifiers added to
+     *            pre-release versions
+     * @param buildMetadata the dot-separated identifiers added as build
+     *            meta-data
+     */
+    public Version(final int majorVersion, final int minorVersion, final int patchVersion,
+            final String[] preReleaseVersion, final String[] buildMetadata) {
+        mMajorVersion = majorVersion;
+        mMinorVersion = minorVersion;
+        mPatchVersion = patchVersion;
+
+        for (final String identifier : preReleaseVersion) {
+            if (identifier.length() == 0) {
+                throw new IllegalArgumentException(
+                        "Tried creating a version object containing a pre-release version identifier with the length of 0.");
+            }
         }
-        if (v1.getPhaseNumber() != v2.getPhaseNumber()) {
-            return v1.getPhaseNumber() < v2.getPhaseNumber() ? -1 : 1;
+        mPreReleaseVersion = preReleaseVersion;
+
+        for (final String identifier : buildMetadata) {
+            if (identifier.length() == 0) {
+                throw new IllegalArgumentException(
+                        "Tried creating a version object containing a build metadata identifier with the length of 0.");
+            }
         }
-        if (!v1.getDate().equals(v2.getDate())) {
-            return v1.getDate().compareTo(v2.getDate());
+        mBuildMetadata = buildMetadata;
+    }
+
+    /**
+     * Initializes a version object.
+     * 
+     * @param version the version string to parse following SemVer
+     */
+    public Version(final String version) {
+        final Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)"
+                + PATTERN_PRE_RELEASE_VERSION_GROUP + PATTERN_BUILD_METADATA_GROUP);
+        final Matcher m = p.matcher(version);
+
+        if (!m.find(0)) {
+            throw new IllegalArgumentException("SemVer unmatched for " + version + ".");
         }
+
+        if (m.start() != 0 || m.end() != version.length()) {
+            throw new IllegalArgumentException("SemVer with unexpected padding for " + version
+                    + ".");
+        }
+
+        try {
+            mMajorVersion = Integer.parseInt(m.group(1), 10);
+            mMinorVersion = Integer.parseInt(m.group(2), 10);
+            mPatchVersion = Integer.parseInt(m.group(3), 10);
+
+            final ArrayList<String> preReleaseVersion = new ArrayList<String>();
+            for (final String identifier : swapNull(m.group(4), "").split("\\.")) {
+                if (identifier.length() > 0) {
+                    preReleaseVersion.add(identifier);
+                }
+            }
+            mPreReleaseVersion = preReleaseVersion.toArray(new String[preReleaseVersion.size()]);
+
+            final ArrayList<String> buildMetadata = new ArrayList<String>();
+            for (final String identifier : swapNull(m.group(5), "").split("\\.")) {
+                if (identifier.length() > 0) {
+                    buildMetadata.add(identifier);
+                }
+            }
+            mBuildMetadata = buildMetadata.toArray(new String[buildMetadata.size()]);
+        } catch (final NumberFormatException e) {
+            throw new IllegalArgumentException("SemVer hit an unexpected non-number for "
+                    + version + ".");
+        }
+    }
+
+    @Override
+    public int compareTo(final Version another) {
+        final int major = another.getMajorVersion();
+        if (mMajorVersion != major) {
+            return mMajorVersion > major ? 1 : -1;
+        }
+
+        final int minor = another.getMinorVersion();
+        if (mMinorVersion != minor) {
+            return mMinorVersion > minor ? 1 : -1;
+        }
+
+        final int patch = another.getPatchVersion();
+        if (mPatchVersion != patch) {
+            return mPatchVersion > patch ? 1 : -1;
+        }
+
+        final String[] preReleaseVersion = another.getPreReleaseVersion();
+        final int l = Math.max(mPreReleaseVersion.length, preReleaseVersion.length);
+        for (int i = 0; i < l; i++) {
+            // the pre-release identifiers for this version are shorter
+            if (i >= mPreReleaseVersion.length) {
+                return -1;
+            }
+
+            // the pre-release identifiers for the another version are shorter
+            if (i >= preReleaseVersion.length) {
+                return 1;
+            }
+
+            // the pre-release identifiers do not match at this location
+            if (!mPreReleaseVersion[i].equals(preReleaseVersion[i])) {
+                Integer thisIdentifierInt = null;
+                try {
+                    thisIdentifierInt = Integer.parseInt(mPreReleaseVersion[i]);
+                } catch (final NumberFormatException e) {
+                }
+
+                Integer anotherIdentifierInt = null;
+                try {
+                    anotherIdentifierInt = Integer.parseInt(preReleaseVersion[i]);
+                } catch (final NumberFormatException e) {
+                }
+
+                // both pre-release identifiers are integers
+                if (thisIdentifierInt != null && anotherIdentifierInt != null) {
+                    return thisIdentifierInt > anotherIdentifierInt ? 1
+                            : -1;
+                }
+
+                // this pre-release identifier is an int while another isn't
+                if (thisIdentifierInt != null && anotherIdentifierInt == null) {
+                    return -1;
+                }
+
+                // this pre-release identifier is not int while another is
+                if (thisIdentifierInt == null && anotherIdentifierInt != null) {
+                    return 1;
+                }
+
+                // neither pre-release identifier is an int
+                return mPreReleaseVersion[i].compareTo(preReleaseVersion[i]);
+            }
+        }
+
         return 0;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        // The objects are identical. (just for optimization)
+        if (this == o) {
+            return true;
+        }
+
+        // The other object has the wrong type.
+        if (!(o instanceof Version)) {
+            return false;
+        }
+
+        // Cast and check all the fields.
+        final Version v = (Version) o;
+        return mMajorVersion == v.mMajorVersion && mMinorVersion == v.mMinorVersion
+                && mPatchVersion == v.mPatchVersion
+                && Arrays.equals(mPreReleaseVersion, v.mPreReleaseVersion);
+    }
+
+    /** @return the dot-separated identifiers added as build meta-data */
+    public String[] getBuildMetadata() {
+        return mBuildMetadata;
+    }
+
+    /** @return the major version number */
+    public int getMajorVersion() {
+        return mMajorVersion;
+    }
+
+    /** @return the minor version number */
+    public int getMinorVersion() {
+        return mMinorVersion;
+    }
+
+    /** @return the patch version number */
+    public int getPatchVersion() {
+        return mPatchVersion;
+    }
+
+    /** @return the dot-separated identifiers added to pre-release versions */
+    public String[] getPreReleaseVersion() {
+        return mPreReleaseVersion;
+    }
+
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @param another the other version to with the check should be done
+     * @return true if this package is newer than or equal to the version
+     *         provided for comparison
+     */
+    public boolean isNewerThanOrEqualTo(final Version another) {
+        // compareTo(another) > 0 means this is newer
+        // compareTo(another) == 0 means they match
+        return compareTo(another) >= 0;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + "[" + "majorVersion=" + mMajorVersion + ", "
+                + "minorVersion=" + mMinorVersion + ", " + "patchVersion=" + mPatchVersion + ", "
+                + "preReleaseVersion=" + Arrays.toString(mPreReleaseVersion) + ", "
+                + "buildMetadata=" + Arrays.toString(mBuildMetadata) + "]";
+    }
+
 }

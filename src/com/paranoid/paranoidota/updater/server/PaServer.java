@@ -65,8 +65,8 @@ public class PaServer implements Server {
                 if (!isNew) {
                     continue;
                 }
-                Version version = new Version(filename);
-                if (Version.compare(mVersion, version) < 0) {
+                Version version = Version.parseSafePA(filename);
+                if (version.isNewerThanOrEqualTo(mVersion)) {
                     list.add(new UpdatePackage(mDevice, filename, version, file.getString("size"),
                             file.getString("url"), file.getString("md5"), false));
                 }
@@ -76,7 +76,7 @@ public class PaServer implements Server {
 
             @Override
             public int compare(PackageInfo lhs, PackageInfo rhs) {
-                return Version.compare(lhs.getVersion(), rhs.getVersion());
+                return lhs.getVersion().compareTo(rhs.getVersion());
             }
 
         });

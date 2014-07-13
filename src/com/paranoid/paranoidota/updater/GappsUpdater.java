@@ -49,7 +49,7 @@ public class GappsUpdater extends Updater {
                 new GooServer(context, false)
         }, fromAlarm);
 
-        mRomVersion = new Version(RomUpdater.getVersionString(context));
+        mRomVersion = Version.parseSafePA(RomUpdater.getVersionString(context));
 
         File file = new File(PROPERTIES_FILE);
         if (file.exists()) {
@@ -109,9 +109,9 @@ public class GappsUpdater extends Updater {
     @Override
     public Version getVersion() {
         if (mPlatform == null || mPlatform.isEmpty() || mVersion == null || mVersion.isEmpty()) {
-            return new Version();
+            return new Version(0, 0, 0);
         }
-        return Version.fromGapps(getPlatform(), mVersion);
+        return Version.parseSafePA(mVersion);
     }
 
     @Override
@@ -121,8 +121,8 @@ public class GappsUpdater extends Updater {
 
     @Override
     public String getDevice() {
-        final String gapps = "GApps/Android " + mRomVersion.getMajor() + "."
-                + mRomVersion.getMinor() + "/";
+        final String gapps = "GApps/Android " + mRomVersion.getMajorVersion() + "."
+                + mRomVersion.getMinorVersion() + "/";
         int type = getSettingsHelper().getGappsType(getTypeForSettings());
         switch (type) {
             case SettingsHelper.GAPPS_MICRO:
