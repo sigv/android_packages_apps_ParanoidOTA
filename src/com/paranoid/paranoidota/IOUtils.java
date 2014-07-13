@@ -48,21 +48,8 @@ public class IOUtils {
         readMounts(context);
     }
 
-    public static boolean isRom(String name) {
-        return name.startsWith("pa_") && name.endsWith(".zip");
-    }
-
     public static boolean isExternalStorageAvailable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
-    }
-
-    public static boolean isInSecondaryStorage(String path) {
-        return !path.startsWith(sPrimarySdcard) && !path.startsWith("/sdcard")
-                && !path.startsWith("/mnt/sdcard");
-    }
-
-    public static boolean hasSecondarySdCard() {
-        return sSecondarySdcard != null;
     }
 
     public static String getPrimarySdCard() {
@@ -272,17 +259,22 @@ public class IOUtils {
         return dir;
     }
 
+    /**
+     * @return {@code true} if the <i>.android-secure</i> directory exists on
+     *         the primary external storage
+     */
     public static boolean hasAndroidSecure() {
-        return folderExists(Environment.getExternalStorageDirectory().getAbsolutePath()
+        final File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
                 + "/.android-secure");
+        return f.exists() && f.isDirectory();
     }
 
+    /**
+     * @return {@code true} if the <i>sd-ext</i> directory exists on the root of
+     *         the file system
+     */
     public static boolean hasSdExt() {
-        return folderExists("/sd-ext");
-    }
-
-    public static boolean folderExists(String path) {
-        File f = new File(path);
+        final File f = new File("/sd-ext");
         return f.exists() && f.isDirectory();
     }
 
