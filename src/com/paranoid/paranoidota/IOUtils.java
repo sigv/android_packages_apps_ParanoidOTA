@@ -34,18 +34,16 @@ import java.util.Scanner;
 
 public class IOUtils {
 
-    public static final String SDCARD = Environment.getExternalStorageDirectory()
-            .getAbsolutePath();
-
-    public static final String DOWNLOAD_PATH = new File(Environment
-            .getExternalStorageDirectory(), "paranoidota/").getAbsolutePath();
-
-    private static final String PREFIX = "pa_";
-    private static final String SUFFIX = ".zip";
+    /** The path of the directory in which the downloads should be stored. */
+    public static final String DOWNLOAD_PATH = new File(Environment.getExternalStorageDirectory(),
+            "paranoidota/").getAbsolutePath();
 
     private static Properties sDictionary;
+
     private static String sPrimarySdcard;
+
     private static String sSecondarySdcard;
+
     private static boolean sSdcardsChecked;
 
     public static void init(Context context) {
@@ -101,7 +99,7 @@ public class IOUtils {
     }
 
     public static boolean isRom(String name) {
-        return name.startsWith(PREFIX) && name.endsWith(SUFFIX);
+        return name.startsWith("pa_") && name.endsWith(".zip");
     }
 
     public static boolean isExternalStorageAvailable() {
@@ -315,7 +313,8 @@ public class IOUtils {
     }
 
     public static boolean hasAndroidSecure() {
-        return folderExists(SDCARD + "/.android-secure");
+        return folderExists(Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/.android-secure");
     }
 
     public static boolean hasSdExt() {
