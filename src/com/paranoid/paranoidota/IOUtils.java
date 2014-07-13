@@ -48,51 +48,6 @@ public class IOUtils {
         readMounts(context);
     }
 
-    public static String[] getDownloadList(Context context) {
-        File downloads = getDownloadsDirectory();
-        ArrayList<String> list = new ArrayList<String>();
-        try {
-            for (File f : downloads.listFiles()) {
-                if (isRom(f.getName())) {
-                    list.add(f.getName());
-                }
-            }
-        } catch (NullPointerException e) {
-            // blah
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
-    public static String[] getDownloadSizes(Context context) {
-        File downloads = getDownloadsDirectory();
-        ArrayList<String> list = new ArrayList<String>();
-        for (File f : downloads.listFiles()) {
-            if (isRom(f.getName())) {
-                list.add(humanReadableByteCount(f.length(), false));
-            }
-        }
-        return list.toArray(new String[list.size()]);
-    }
-
-    public static String getDownloadSize(Context context, String fileName) {
-        File downloads = getDownloadsDirectory();
-        for (String file : getDownloadList(context)) {
-            if (fileName.equals(file)) {
-                File f = new File(downloads, fileName);
-                return humanReadableByteCount(f.length(), false);
-            }
-        }
-        return "0";
-    }
-
-    public static boolean isOnDownloadList(Context context, String fileName) {
-        for (String file : getDownloadList(context)) {
-            if (fileName.equals(file))
-                return true;
-        }
-        return false;
-    }
-
     public static boolean isRom(String name) {
         return name.startsWith("pa_") && name.endsWith(".zip");
     }
