@@ -42,10 +42,9 @@ import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.Updater;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Properties;
 
@@ -207,23 +206,14 @@ public class Utils {
      * @return the output of the executed command
      * @throws RuntimeException in the case of anything going horribly wrong
      */
-    public static String exec(String command) {
+    public static String exec(final String command) {
         Process p = null;
 
         try {
-            p = Runtime.getRuntime().exec(command);
+            p = Runtime.getRuntime().exec(command.split(" "));
         } catch (IOException e) {
             throw new RuntimeException("The requested command (" + command
                     + ") could not be executed.", e);
-        }
-
-        try {
-            DataOutputStream os = new DataOutputStream(p.getOutputStream());
-            os.writeBytes("sync\n");
-            os.writeBytes("exit\n");
-            os.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("The data output stream could not be written to.", e);
         }
 
         try {
@@ -232,33 +222,32 @@ public class Utils {
             throw new RuntimeException("The wait for the requested process was interrupted.", e);
         }
 
-        final InputStream is = p.getInputStream();
-        final DataInputStream dis = new DataInputStream(is);
-
-        StringBuffer buffer = new StringBuffer();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        StringBuffer output = new StringBuffer();
 
         try {
-            while (dis.available() > 0) {
-                buffer.append("\n").append(dis.readLine());
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
             }
         } catch (IOException e) {
-            throw new RuntimeException("The data input stream could not be read.", e);
+            // just stop looking for new lines & return what we got
         }
 
         try {
-            dis.close();
+            reader.close();
         } catch (IOException e) {
-            throw new RuntimeException("The data input stream could not be closed.", e);
+            // we don't really care about this that much (we at least tried)
         }
 
-        String output = buffer.toString();
-        while (output.startsWith("\n")) {
-            output = output.substring(1);
+        String data = output.toString();
+        while (data.startsWith("\n")) {
+            data = output.substring(1);
         }
-        while (output.endsWith("\n")) {
-            output = output.substring(0, output.length() - 1);
+        while (data.endsWith("\n")) {
+            data = output.substring(0, output.length() - 1);
         }
-        return output;
+        return data;
     }
 
     /**
