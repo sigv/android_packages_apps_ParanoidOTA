@@ -123,19 +123,19 @@ public class GappsUpdater extends Updater {
 
     @Override
     public String getDevice() {
-        final String gapps = "GApps/Android " + mRomVersion.getMajorVersion() + "."
+        final String gapps = "GApps/Android%20" + mRomVersion.getMajorVersion() + "."
                 + mRomVersion.getMinorVersion() + "/";
         int type = getSettingsHelper().getGappsType(getTypeForSettings());
         switch (type) {
             case SettingsHelper.GAPPS_MICRO:
-                return gapps + "Micro-Modular GApps";
+                return gapps + "Micro-Modular%20GApps";
             case SettingsHelper.GAPPS_MINI:
-                return gapps + "Mini-Modular GApps";
+                return gapps + "Mini-Modular%20GApps";
             case SettingsHelper.GAPPS_STOCK:
-                return gapps + "Google Stock GApps";
+                return gapps + "Google%20Stock%20GApps";
             case SettingsHelper.GAPPS_FULL:
             default:
-                return gapps + "Full-Modular GApps";
+                return gapps + "Full-Modular%20GApps";
         }
     }
 

@@ -29,7 +29,6 @@ import com.paranoid.paranoidota.updater.UpdatePackage;
 import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ import java.util.List;
 
 public class GooServer implements Server {
 
-    private static final String URL = "http://goo.im/json2&path=/devs/paranoidandroid/roms/%s&ro_board=%s";
+    private static final String URL = "https://api.goo.im/files/devs/paranoidandroid/roms/%s?ro_board=%s";
     private static final String GAPPS_RESERVED_WORDS = "-signed|-modular|-full|-mini|-micro|-stock";
 
     private Context mContext;
@@ -66,20 +65,16 @@ public class GooServer implements Server {
     public List<PackageInfo> createPackageInfoList(JSONObject response) throws Exception {
         List<PackageInfo> list = new ArrayList<PackageInfo>();
         mError = null;
-        JSONObject update = null;
-        try {
-            update = response.getJSONObject("update_info");
-        } catch (JSONException ex) {
-            update = response;
-        }
-        JSONArray updates = update.optJSONArray("list");
+        JSONArray updates = response.optJSONArray("files");
         if (updates == null) {
             mError = mContext.getResources().getString(R.string.error_device_not_found_server);
         }
         for (int i = 0; updates != null && i < updates.length(); i++) {
             JSONObject file = updates.getJSONObject(i);
-            String filename = file.optString("filename");
-            if (filename != null && !filename.isEmpty() && filename.endsWith(".zip")) {
+            String onlinePath = file.optString("path");
+            if (onlinePath != null && !onlinePath.isEmpty() && onlinePath.endsWith(".zip")) {
+                String[] pathParts = onlinePath.split("/");
+                String filename = pathParts[pathParts.length - 1];
                 String stripped = filename.replace(".zip", "");
                 if (!mIsRom) {
                     stripped = stripped.replaceAll("\\b(" + GAPPS_RESERVED_WORDS + ")\\b", "");
@@ -102,7 +97,7 @@ public class GooServer implements Server {
                 Version version = Version.parseSafePA(filename);
                 if (version.isNewerThanOrEqualTo(mVersion)) {
                     list.add(new UpdatePackage(mDevice, filename, version, file
-                            .getLong("filesize"), "http://goo.im"
+                            .getLong("filesize"), "https://goo.im"
                             + file.getString("path"), file.getString("md5"),
                             !mIsRom));
                 }

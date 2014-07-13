@@ -21,11 +21,13 @@ package com.paranoid.paranoidota.updater;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.SSLCertificateSocketFactory;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.paranoid.paranoidota.Utils;
@@ -95,7 +97,8 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
         mContext = context;
         mServers = servers;
         mFromAlarm = fromAlarm;
-        mQueue = Volley.newRequestQueue(context);
+        mQueue = Volley.newRequestQueue(context, new HurlStack(null,
+                SSLCertificateSocketFactory.getDefault(0, null)));
     }
 
     public abstract Version getVersion();
