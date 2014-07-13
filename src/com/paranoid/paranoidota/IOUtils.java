@@ -325,4 +325,9 @@ public class IOUtils {
         File f = new File(path);
         return f.exists() && f.isDirectory();
     }
+
+    /** @hide */
+    private IOUtils() {
+    }
+
 }
