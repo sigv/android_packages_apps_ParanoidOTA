@@ -111,7 +111,9 @@ public class GappsUpdater extends Updater {
         if (mPlatform == null || mPlatform.isEmpty() || mVersion == null || mVersion.isEmpty()) {
             return new Version(0, 0, 0);
         }
-        return Version.parseSafePA(mVersion);
+        return Version.parseSafePA("gapps-"
+                + (mPlatform.length() > 0 ? mPlatform.substring(0, 1) : "0") + "."
+                + (mPlatform.length() > 1 ? mPlatform.substring(1) : "0") + "-" + mVersion);
     }
 
     @Override
