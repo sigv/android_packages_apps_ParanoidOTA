@@ -521,4 +521,8 @@ public class Utils {
         return device;
     }
 
+    /** @hide */
+    private Utils() {
+    }
+
 }
