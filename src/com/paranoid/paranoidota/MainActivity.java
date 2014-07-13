@@ -209,8 +209,6 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
 
         if (mSavedInstanceState == null) {
 
-            IOUtils.init(this);
-
             mCardsLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.up_from_bottom));
 
             if (mNotificationInfo != null) {

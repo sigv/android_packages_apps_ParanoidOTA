@@ -36,34 +36,56 @@ public class IOUtils {
 
     private static Properties sDictionary;
 
-    private static String sPrimarySdcard;
+    /** The mount point of the primary SD card or a null value if none exist. */
+    private static String sMountPointPrimarySdcard = null;
 
-    private static String sSecondarySdcard;
+    /** The mount point of the secondary SD card or a null value if none exist. */
+    private static String sMountPointSecondarySdcard = null;
 
-    private static boolean sSdcardsChecked;
+    /** Boolean value informing whether the mount points have to be checked. */
+    private static boolean sShouldCheckMounts = true;
 
-    public static void init(Context context) {
+    static {
         getDownloadsDirectory();
-
-        readMounts(context);
+        checkMounts();
     }
 
+    /** @return {@code true} if the primary external storage is present & mounted */
     public static boolean isExternalStorageAvailable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 
+    /** @return the mount point of the primary SD card */
     public static String getPrimarySdCard() {
-        return sPrimarySdcard;
+        if (sMountPointPrimarySdcard == null) {
+            if (sShouldCheckMounts) {
+                checkMounts();
+            } else {
+                sMountPointPrimarySdcard = Environment.getExternalStorageDirectory()
+                        .getAbsolutePath();
+            }
+        }
+
+        return sMountPointPrimarySdcard;
     }
 
+    /**
+     * @return the mount point of the secondary SD card or a null value if no
+     *         such mount point has been located
+     */
     public static String getSecondarySdCard() {
-        return sSecondarySdcard;
+        return sMountPointSecondarySdcard;
     }
 
-    private static void readMounts(Context context) {
-        if (sSdcardsChecked) {
+    /** Checks for the primary and secondary external storages. */
+    private synchronized static void checkMounts() {
+        if (!sShouldCheckMounts) {
             return;
         }
+
+        sShouldCheckMounts = false;
+        sMountPointPrimarySdcard = null;
+        sMountPointSecondarySdcard = null;
 
         ArrayList<String> mounts = new ArrayList<String>();
         ArrayList<String> vold = new ArrayList<String>();
@@ -151,42 +173,35 @@ public class IOUtils {
             String mount = mounts.get(i);
             if (mount.indexOf("sdcard0") < 0 && !mount.equalsIgnoreCase("/mnt/sdcard")
                     && !mount.equalsIgnoreCase("/sdcard")) {
-                sSecondarySdcard = mount;
+                sMountPointSecondarySdcard = mount;
             } else {
-                sPrimarySdcard = mount;
+                sMountPointPrimarySdcard = mount;
             }
         }
 
-        if (sPrimarySdcard == null) {
-            sPrimarySdcard = "/sdcard";
+        if (sMountPointPrimarySdcard == null) {
+            sMountPointPrimarySdcard = "/sdcard";
         }
-
-        sSdcardsChecked = true;
     }
 
+    /** @return the current fstab file or a null value if none can be found */
     private static File findFstab() {
-        File file = null;
-
-        file = new File("/system/etc/vold.fstab");
-        if (file.exists()) {
-            return file;
+        File vold = new File("/system/etc/vold.fstab");
+        if (vold.exists()) {
+            return vold;
         }
 
-        String fstab = Utils
-                .exec("grep -ls \"/dev/block/\" * --include=fstab.* --exclude=fstab.goldfish");
-        if (fstab != null) {
-            String[] files = fstab.split("\n");
-            for (int i = 0; i < files.length; i++) {
-                file = new File(files[i]);
-                if (file.exists()) {
-                    return file;
-                }
+        for (String fstab : Utils.exec("grep -ls \"/dev/block/\" /fstab.*").split("\n")) {
+            File file = new File(fstab);
+            if (file.exists()) {
+                return file;
             }
         }
 
         return null;
     }
 
+    /** @return count of gigabytes of space left on the primary external storage */
     public static double getSpaceLeft() {
         StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
         double sdAvailSize = (double) stat.getAvailableBlocksLong()
@@ -195,6 +210,12 @@ public class IOUtils {
         return sdAvailSize / 1073741824;
     }
 
+    /**
+     * @param bytes count of bytes
+     * @param si {@code true} if the blocks should be exactly 1000 units large;
+     *            {@code false} if 1024
+     * @return formatted size value readable by normal human beings
+     */
     public static String humanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         if (bytes < unit)
@@ -204,6 +225,10 @@ public class IOUtils {
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre).replace(",", ".");
     }
 
+    /**
+     * @param file the source file
+     * @return the generated md5 checksum
+     */
     public static String md5(File file) {
         InputStream is = null;
         try {
@@ -231,6 +256,13 @@ public class IOUtils {
         }
     }
 
+    /**
+     * Loads the local dictionary. It is automatically cached meaning following
+     * calls will be from the memory.
+     * 
+     * @param context context to use for loading, if needed
+     * @return the local dictionary
+     */
     public static Properties getDictionary(Context context) {
         if (sDictionary == null) {
             sDictionary = new Properties();
@@ -240,6 +272,7 @@ public class IOUtils {
                 throw new RuntimeException(e);
             }
         }
+
         return sDictionary;
     }
 
