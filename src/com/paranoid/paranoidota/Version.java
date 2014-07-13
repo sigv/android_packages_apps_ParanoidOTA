@@ -88,7 +88,7 @@ public final class Version implements Comparable<Version> {
     public static Version parsePA(final String version) throws IllegalArgumentException {
         final Matcher m = Pattern
                 .compile(
-                        "(?:pa_)?(.+(?:-.+)?)-(\\d+)\\.(\\d)(?:(\\d+))?(-\\w+)?(-\\w+)?(?:-signed)?(?:\\.zip)?")
+                        "(?:pa_)?(.+(?:-.+)?)-(\\d+)\\.(\\d)(?:\\.?(\\d+))?(-\\w+)?(-\\w+)?(?:-signed)?(?:\\.zip)?")
                 .matcher(version);
 
         if (!m.find(0)) {
