@@ -24,17 +24,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+/** Download completion and notification listener. */
 public class DownloadReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
-        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-        Intent i = new Intent(context, MainActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        i.putExtra(Utils.Extras.CHECK_DOWNLOADS_FINISHED.getName(), true);
-        i.putExtra(Utils.Extras.CHECK_DOWNLOADS_ID.getName(), id);
-        context.startActivity(i);
+    public void onReceive(final Context context, final Intent intent) {
+        context.startActivity(new Intent(context, MainActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        | Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .putExtra(Utils.Extras.CHECK_DOWNLOADS_FINISHED.getName(), true)
+                .putExtra(Utils.Extras.CHECK_DOWNLOADS_ID.getName(),
+                        intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0)));
     }
 
 }

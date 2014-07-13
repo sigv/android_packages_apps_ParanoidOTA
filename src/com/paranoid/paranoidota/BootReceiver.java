@@ -25,10 +25,11 @@ import android.content.Intent;
 
 import com.paranoid.paranoidota.Utils.AlarmType;
 
+/** Device boot event listener. */
 public class BootReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, final Intent intent) {
         Utils.setAlarm(context, AlarmType.ROM, true);
         Utils.setAlarm(context, AlarmType.GAPPS, true);
     }
