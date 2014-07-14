@@ -42,7 +42,7 @@ public class UpdatePackage implements PackageInfo, Serializable {
     public UpdatePackage(String device, String name, Version version, long size, String url,
             String md5, boolean gapps) {
         this(device, name, version,
-                IOUtils.humanReadableByteCount(size, false), url, md5, gapps);
+                IOUtils.formatHumanReadableByteCount(size, false), url, md5, gapps);
     }
 
     public UpdatePackage(String device, String name, Version version, String size, String url,

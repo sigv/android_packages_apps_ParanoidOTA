@@ -51,7 +51,7 @@ public class RebootHelper {
     private void showBackupDialog(final Context context, final String[] items,
             final boolean wipeData, final boolean wipeCaches) {
 
-        double spaceLeft = IOUtils.getSpaceLeft();
+        double spaceLeft = IOUtils.getGbLeftOnPrimarySdCard();
         if (spaceLeft < 1.0) {
             AlertDialog.Builder alert = new AlertDialog.Builder(context);
             alert.setTitle(R.string.alert_backup_space_title);

@@ -22,18 +22,26 @@ package com.paranoid.paranoidota;
 import android.content.Context;
 import android.os.Environment;
 import android.os.StatFs;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Scanner;
 
 /** Generic convenience class containing I/O helper tools. */
 public class IOUtils {
+
+    /** Logging tag for the class. */
+    private static final String TAG = "IOUtils";
 
     private static Properties sDictionary;
 
@@ -202,12 +210,10 @@ public class IOUtils {
     }
 
     /** @return count of gigabytes of space left on the primary external storage */
-    public static double getSpaceLeft() {
-        StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
-        double sdAvailSize = (double) stat.getAvailableBlocksLong()
-                * (double) stat.getBlockSizeLong();
-        // One binary gigabyte equals 1,073,741,824 bytes.
-        return sdAvailSize / 1073741824;
+    public static double getGbLeftOnPrimarySdCard() {
+        final StatFs stat = new StatFs(getPrimarySdCard());
+        return ((double) stat.getAvailableBlocksLong() * (double) stat.getBlockSizeLong())
+                / (1024 * 1024 * 1024);
     }
 
     /**
@@ -216,60 +222,78 @@ public class IOUtils {
      *            {@code false} if 1024
      * @return formatted size value readable by normal human beings
      */
-    public static String humanReadableByteCount(long bytes, boolean si) {
-        int unit = si ? 1000 : 1024;
-        if (bytes < unit)
+    public static String formatHumanReadableByteCount(final long bytes, final boolean si) {
+        final int unit = si ? 1000 : 1024;
+
+        if (bytes < unit) {
             return bytes + " B";
-        int exp = (int) (Math.log(bytes) / Math.log(unit));
-        String pre = (si ? "kMG" : "KMG").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre).replace(",", ".");
+        }
+
+        final int exp = (int) (Math.log(bytes) / Math.log(unit));
+        return String.format(Locale.US, "%.1f %sB", bytes / Math.pow(unit, exp),
+                (si ? "kMG" : "KMG").charAt(exp - 1) + (si ? "" : "i")).replace(",", ".");
     }
 
     /**
      * @param file the source file
      * @return the generated md5 checksum
+     * @throws FileNotFoundException in the case of the requested file not
+     *             existing and being available for checking
      */
-    public static String md5(File file) {
-        InputStream is = null;
+    public static String md5(File file) throws FileNotFoundException {
+        MessageDigest digest = null;
         try {
-            is = new FileInputStream(file);
-            MessageDigest digest = MessageDigest.getInstance("MD5");
-            byte[] buffer = new byte[8192];
-            int read = 0;
+            digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 is not a valid and available algorithm.", e);
+        }
+
+        final InputStream is = new FileInputStream(file);
+
+        byte[] buffer = new byte[8192];
+        int read = 0;
+
+        try {
             while ((read = is.read(buffer)) > 0) {
                 digest.update(buffer, 0, read);
             }
-            byte[] md5sum = digest.digest();
-            BigInteger bigInt = new BigInteger(1, md5sum);
-            String md5 = bigInt.toString(16);
-            while (md5.length() < 32) {
-                md5 = "0" + md5;
-            }
-            return md5;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                is.close();
-            } catch (Exception e) {
-            }
+        } catch (IOException e) {
+            // in the case of a reading failure, we just roll with what we got
         }
+
+        try {
+            is.close();
+        } catch (IOException e) {
+            // we tried - we failed - move on
+        }
+
+        String md5 = new BigInteger(1, digest.digest()).toString(16);
+        while (md5.length() < 32) {
+            md5 = "0" + md5;
+        }
+        return md5;
     }
 
     /**
-     * Loads the local dictionary. It is automatically cached meaning following
-     * calls will be from the memory.
+     * Loads the local dictionary. This call might be a blocking call if the
+     * dictionary has not yet been loaded into the memory.
      * 
-     * @param context context to use for loading, if needed
+     * @param context context to use for loading which could be needed
      * @return the local dictionary
+     * @throws RuntimeException in case an attempt to load the dictionary from
+     *             the storage was done but failed
      */
     public static Properties getDictionary(Context context) {
-        if (sDictionary == null) {
-            sDictionary = new Properties();
-            try {
-                sDictionary.load(context.getAssets().open("dictionary.properties"));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        synchronized (IOUtils.class) {
+            if (sDictionary == null) {
+                sDictionary = new Properties();
+                try {
+                    sDictionary.load(context.getAssets().open("dictionary.properties"));
+                } catch (IOException e) {
+                    // we are suppressing this as the application can carry on
+                    // with the empty properties object which was just created
+                    Log.w(TAG, "The local dictionary could not be loaded.", e);
+                }
             }
         }
 

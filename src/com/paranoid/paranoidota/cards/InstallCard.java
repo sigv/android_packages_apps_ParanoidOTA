@@ -43,6 +43,7 @@ import com.paranoid.paranoidota.widget.Item;
 import com.paranoid.paranoidota.widget.Item.OnItemClickListener;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -177,20 +178,26 @@ public class InstallCard extends Card implements RequestFileCallback {
 
                 public void run() {
 
-                    final String calculatedMd5 = IOUtils.md5(file);
+                    try {
+                        final String calculatedMd5 = IOUtils.md5(file);
 
-                    pDialog.dismiss();
+                        pDialog.dismiss();
 
-                    ((Activity) getContext()).runOnUiThread(new Runnable() {
+                        ((Activity) getContext()).runOnUiThread(new Runnable() {
 
-                        public void run() {
-                            if (md5.equals(calculatedMd5)) {
-                                reallyAddFile(file);
-                            } else {
-                                showMd5Mismatch(md5, calculatedMd5, file);
+                            public void run() {
+                                if (md5.equals(calculatedMd5)) {
+                                    reallyAddFile(file);
+                                } else {
+                                    showMd5Mismatch(md5, calculatedMd5, file);
+                                }
                             }
-                        }
-                    });
+                        });
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(
+                                "Tried to add a non-existant file for installation.", e);
+                    }
+
                 }
             }).start();
 
