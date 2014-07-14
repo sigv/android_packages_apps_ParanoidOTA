@@ -19,7 +19,6 @@
 
 package com.paranoid.paranoidota;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
 import android.os.StatFs;
@@ -87,7 +86,6 @@ public class IOUtils {
     }
 
     /** Checks for the primary and secondary external storages. */
-    @SuppressLint("SdCardPath")
     private synchronized static void checkMounts() {
         if (!sShouldCheckMounts) {
             return;
