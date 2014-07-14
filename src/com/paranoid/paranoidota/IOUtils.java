@@ -43,7 +43,8 @@ public class IOUtils {
     /** Logging tag for the class. */
     private static final String TAG = "IOUtils";
 
-    private static Properties sDictionary;
+    /** The main dictionary containing device names for later replacements. */
+    private static Properties sDeviceDictionary;
 
     /** The mount point of the primary SD card or a null value if none exist. */
     private static String sMountPointPrimarySdcard = null;
@@ -285,10 +286,10 @@ public class IOUtils {
      */
     public static Properties getDictionary(Context context) {
         synchronized (IOUtils.class) {
-            if (sDictionary == null) {
-                sDictionary = new Properties();
+            if (sDeviceDictionary == null) {
+                sDeviceDictionary = new Properties();
                 try {
-                    sDictionary.load(context.getAssets().open("dictionary.properties"));
+                    sDeviceDictionary.load(context.getAssets().open("dictionary.properties"));
                 } catch (IOException e) {
                     // we are suppressing this as the application can carry on
                     // with the empty properties object which was just created
@@ -297,7 +298,7 @@ public class IOUtils {
             }
         }
 
-        return sDictionary;
+        return sDeviceDictionary;
     }
 
     /**
