@@ -47,7 +47,6 @@ public class IOUtils {
     private static boolean sShouldCheckMounts = true;
 
     static {
-        getDownloadsDirectory();
         checkMounts();
     }
 
