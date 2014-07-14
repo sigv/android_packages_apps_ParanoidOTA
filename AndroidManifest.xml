@@ -41,7 +41,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
-            android:name="com.paranoid.paranoidota.MainActivity"
+            android:name="com.paranoid.paranoidota.activities.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:hardwareAccelerated="true" >
@@ -54,7 +54,7 @@
         <activity android:name="com.paranoid.paranoidota.activities.SettingsActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.paranoid.paranoidota.MainActivity" />
+                android:value="com.paranoid.paranoidota.activities.MainActivity" />
         </activity>
 
         <activity

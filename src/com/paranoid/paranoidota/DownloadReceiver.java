@@ -24,6 +24,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.paranoid.paranoidota.activities.MainActivity;
+
 /** Download completion and notification listener. */
 public class DownloadReceiver extends BroadcastReceiver {
 

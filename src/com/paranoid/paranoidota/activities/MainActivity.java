@@ -17,7 +17,7 @@
  * along with Paranoid OTA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.paranoid.paranoidota;
+package com.paranoid.paranoidota.activities;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -47,9 +47,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Utils.AlarmType;
 import com.paranoid.paranoidota.Utils.NotificationInfo;
-import com.paranoid.paranoidota.activities.SettingsActivity;
 import com.paranoid.paranoidota.cards.DownloadCard;
 import com.paranoid.paranoidota.cards.InstallCard;
 import com.paranoid.paranoidota.cards.SystemCard;
