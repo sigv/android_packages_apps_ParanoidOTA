@@ -35,8 +35,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import com.paranoid.paranoidota.URLStringReader;
-import com.paranoid.paranoidota.URLStringReader.URLStringReaderListener;
+import com.paranoid.paranoidota.NetStringReader;
+import com.paranoid.paranoidota.NetStringReader.NetStringListener;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Utils.AlarmType;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
@@ -171,10 +171,10 @@ public class SettingsActivity extends PreferenceActivity implements
                             String url = LOGIN_URL + "&username="
                                     + URLEncoder.encode(user, "UTF-8") + "&password="
                                     + URLEncoder.encode(pass, "UTF-8");
-                            new URLStringReader(new URLStringReaderListener() {
+                            new NetStringReader(new NetStringListener() {
 
                                 @Override
-                                public void onReadEnd(String buffer) {
+                                public void onReadFinish(String buffer) {
                                     progressDialog.dismiss();
                                     if (buffer != null && buffer.length() == 32) {
                                         mSettingsHelper.login(buffer);
