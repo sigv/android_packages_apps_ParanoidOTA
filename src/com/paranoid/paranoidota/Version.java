@@ -490,16 +490,31 @@ public final class Version implements Comparable<Version> {
         return compareTo(another) >= 0;
     }
 
-    /** @return a formatted string for displaying to the user */
+    /**
+     * Formats the version object for displaying to the user. This method should
+     * not be depended upon to return consistent values across multiple versions
+     * of the code (which would be helpful for later parsing) and should only be
+     * used for displaying at runtime.
+     * 
+     * @return a formatted string to display to the user
+     */
     public String toDisplayString() {
         String out = mMajorVersion + "." + mMinorVersion + "." + mPatchVersion;
 
-        for (final String part : mPreReleaseVersion) {
-            out += "-" + part;
+        if (mPreReleaseVersion.length > 0) {
+            out += "(";
+            for (final String part : mPreReleaseVersion) {
+                out += part + " ";
+            }
+            out = out.trim() + ")";
         }
 
-        for (final String part : mBuildMetadata) {
-            out += "-" + part;
+        if (mBuildMetadata.length > 0) {
+            out += "[";
+            for (final String part : mBuildMetadata) {
+                out += part + " ";
+            }
+            out = out.trim() + "]";
         }
 
         return out;
