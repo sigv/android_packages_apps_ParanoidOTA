@@ -74,7 +74,7 @@ public class CwmBasedRecovery extends RecoveryInfo {
         }
 
         if (size > 0) {
-            if (IOUtils.isExternalStorageAvailable()) {
+            if (IOUtils.isExternalStorageMounted()) {
                 commands.add("run_program(\"/sbin/mount\", \""
                         + getExternalSdcard() + "\");");
             }

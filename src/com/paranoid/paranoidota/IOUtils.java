@@ -51,8 +51,8 @@ public class IOUtils {
     }
 
     /** @return {@code true} if the primary external storage is present & mounted */
-    public static boolean isExternalStorageAvailable() {
-        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    public static boolean isExternalStorageMounted() {
+        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
     }
 
     /** @return the mount point of the primary SD card */
@@ -109,7 +109,7 @@ public class IOUtils {
                 scanner.close();
             }
         }
-        boolean addExternal = mounts.size() == 1 && isExternalStorageAvailable();
+        boolean addExternal = mounts.size() == 1 && isExternalStorageMounted();
         if (mounts.size() == 0 && addExternal) {
             mounts.add("/mnt/sdcard");
         }
@@ -153,10 +153,10 @@ public class IOUtils {
                 }
             }
         }
-        if (addExternal && (vold.size() == 1 && isExternalStorageAvailable())) {
+        if (addExternal && (vold.size() == 1 && isExternalStorageMounted())) {
             mounts.add(vold.get(0));
         }
-        if (vold.size() == 0 && isExternalStorageAvailable()) {
+        if (vold.size() == 0 && isExternalStorageMounted()) {
             vold.add("/mnt/sdcard");
         }
 
