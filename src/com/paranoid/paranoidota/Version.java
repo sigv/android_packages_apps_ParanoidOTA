@@ -502,7 +502,7 @@ public final class Version implements Comparable<Version> {
         String out = mMajorVersion + "." + mMinorVersion + "." + mPatchVersion;
 
         if (mPreReleaseVersion.length > 0) {
-            out += "(";
+            out += " (";
             for (final String part : mPreReleaseVersion) {
                 out += part + " ";
             }
@@ -510,7 +510,7 @@ public final class Version implements Comparable<Version> {
         }
 
         if (mBuildMetadata.length > 0) {
-            out += "[";
+            out += " [";
             for (final String part : mBuildMetadata) {
                 out += part + " ";
             }
