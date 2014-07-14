@@ -68,7 +68,7 @@
         <activity android:name="com.paranoid.paranoidota.activities.RequestFileActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <receiver android:name="com.paranoid.paranoidota.NotificationAlarm" />
+        <receiver android:name="com.paranoid.paranoidota.NotificationAlarmReceiver" />
 
         <receiver
             android:name="com.paranoid.paranoidota.BootReceiver"

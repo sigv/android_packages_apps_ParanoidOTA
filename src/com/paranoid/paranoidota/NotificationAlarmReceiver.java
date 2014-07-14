@@ -26,23 +26,29 @@ import android.content.Intent;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
 
-public class NotificationAlarm extends BroadcastReceiver {
+/** The alarm receiver handling scheduled update checks. */
+public class NotificationAlarmReceiver extends BroadcastReceiver {
 
-    private RomUpdater mRomUpdater;
+    /** The cached GApps updater instance. */
     private GappsUpdater mGappsUpdater;
+
+    /** The cached ROM updater instance. */
+    private RomUpdater mRomUpdater;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         if (mRomUpdater == null) {
             mRomUpdater = new RomUpdater(context, true);
         }
+
         if (mGappsUpdater == null) {
             mGappsUpdater = new GappsUpdater(context, true);
         }
+
         if (Utils.isNetworkAvailable(context)) {
             mRomUpdater.check();
             mGappsUpdater.check();
         }
     }
+
 }

@@ -168,7 +168,7 @@ public class Utils {
      */
     public static boolean alarmExists(Context context, AlarmType alarmType) {
         return (PendingIntent.getBroadcast(context, alarmType.mId, new Intent(context,
-                NotificationAlarm.class), PendingIntent.FLAG_NO_CREATE) != null);
+                NotificationAlarmReceiver.class), PendingIntent.FLAG_NO_CREATE) != null);
     }
 
     /**
@@ -338,7 +338,7 @@ public class Utils {
         }
 
         PendingIntent intent = PendingIntent.getBroadcast(context,
-                alarmType.mId, new Intent(context, NotificationAlarm.class)
+                alarmType.mId, new Intent(context, NotificationAlarmReceiver.class)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
