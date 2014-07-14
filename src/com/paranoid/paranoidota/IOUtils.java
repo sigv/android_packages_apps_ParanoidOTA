@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Scanner;
 
+/** Generic convenience class containing I/O helper tools. */
 public class IOUtils {
 
     private static Properties sDictionary;
