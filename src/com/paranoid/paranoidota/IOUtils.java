@@ -19,6 +19,7 @@
 
 package com.paranoid.paranoidota;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
 import android.os.StatFs;
@@ -86,6 +87,7 @@ public class IOUtils {
     }
 
     /** Checks for the primary and secondary external storages. */
+    @SuppressLint("SdCardPath")
     private synchronized static void checkMounts() {
         if (!sShouldCheckMounts) {
             return;
@@ -137,7 +139,7 @@ public class IOUtils {
                             element = element.substring(0, element.indexOf(":"));
                         }
 
-                        if (element.toLowerCase().indexOf("usb") < 0) {
+                        if (element.toLowerCase(Locale.US).indexOf("usb") < 0) {
                             vold.add(element);
                         }
                     } else if (line.startsWith("/devices/platform")) {
@@ -148,7 +150,7 @@ public class IOUtils {
                             element = element.substring(0, element.indexOf(":"));
                         }
 
-                        if (element.toLowerCase().indexOf("usb") < 0) {
+                        if (element.toLowerCase(Locale.US).indexOf("usb") < 0) {
                             vold.add(element);
                         }
                     }
