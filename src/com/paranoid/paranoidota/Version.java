@@ -32,8 +32,79 @@ import java.util.regex.Pattern;
  */
 public final class Version implements Comparable<Version> {
 
-    /** @hide */
-    private static final String PA_PHASE_ARRAY_MARKER = "phase";
+    /** Internal PA specification helper wrapping some of the parsing. */
+    private static class PASupport {
+
+        /** @hide */
+        private static final String ID_TRAILING_ALPHA = "1";
+
+        /** @hide */
+        private static final String ID_TRAILING_BETA = "2";
+
+        /** @hide */
+        private static final String ID_TRAILING_GOLD = "4";
+
+        /** @hide */
+        private static final String ID_TRAILING_PHASE_MARKER = "phase";
+
+        /** @hide */
+        private static final String ID_TRAILING_RC = "3";
+
+        /**
+         * Parses trailing bits of the PA specification so that they can be used
+         * for a SemVer-style object as the pre-release version.
+         * 
+         * @param input the trailing bits of the PA specification
+         * @return the array to use as a part of the pre-release version
+         */
+        private static String[] parseTrailingValue(String input) {
+            if (input.startsWith("-")) {
+                input = input.substring(1);
+            }
+            if (input.length() == 0) {
+                // nothing specified
+                return new String[] {
+                        "", ""
+                };
+            } else if (input.substring(0, 1).matches("[0-9]")) {
+                // release date
+                try {
+                    return new String[] {
+                            input.substring(0, 8), input.substring(8)
+                    };
+                } catch (final IndexOutOfBoundsException e) {
+                    return new String[] {
+                            input, ""
+                    };
+                }
+            } else if (input.startsWith("A")) {
+                // phase ALPHA X
+                return new String[] {
+                        ID_TRAILING_PHASE_MARKER, ID_TRAILING_ALPHA,
+                        input.substring(input.startsWith("ALPHA") ? 5 : 1)
+                };
+            } else if (input.startsWith("B")) {
+                // phase BETA X
+                return new String[] {
+                        ID_TRAILING_PHASE_MARKER, ID_TRAILING_BETA,
+                        input.startsWith("BETA") ? input.length() > 4 ? input.substring(4) : "0"
+                                : input.length() > 1 ? input.substring(1) : "0"
+                };
+            } else if (input.startsWith("RC")) {
+                // phase RC X
+                return new String[] {
+                        ID_TRAILING_PHASE_MARKER, ID_TRAILING_RC,
+                        input.length() > 2 ? input.substring(2) : "0"
+                };
+            } else {
+                // unknown - assume phase GOLD 0
+                return new String[] {
+                        ID_TRAILING_PHASE_MARKER, ID_TRAILING_GOLD, "0"
+                };
+            }
+        }
+
+    }
 
     /** The semi-capturing group for the build meta-data. */
     private static final String PATTERN_BUILD_METADATA_GROUP;
@@ -84,6 +155,7 @@ public final class Version implements Comparable<Version> {
      * @param version the PA package version meta-data
      * @return the parsed SemVer object
      * @throws IllegalArgumentException in case the input meta-data is invalid
+     * @see #parseSafePA(String)
      */
     public static Version parsePA(final String version) throws IllegalArgumentException {
         final Matcher m = Pattern
@@ -107,10 +179,10 @@ public final class Version implements Comparable<Version> {
             final int minorVersion = Integer.parseInt(m.group(3), 10);
             final int maintenanceVersion = Integer.parseInt(swapNull(m.group(4), "0"), 10);
 
-            String[] trailingOne = parsePATrailingValue(swapNull(m.group(5), ""));
-            String[] trailingTwo = parsePATrailingValue(swapNull(m.group(6), ""));
+            String[] trailingOne = PASupport.parseTrailingValue(swapNull(m.group(5), ""));
+            String[] trailingTwo = PASupport.parseTrailingValue(swapNull(m.group(6), ""));
 
-            if (trailingOne[0].equals(PA_PHASE_ARRAY_MARKER)) {
+            if (trailingOne[0].equals(PASupport.ID_TRAILING_PHASE_MARKER)) {
                 final String[] temporaryStore = trailingOne;
                 trailingOne = trailingTwo;
                 trailingTwo = temporaryStore;
@@ -140,59 +212,6 @@ public final class Version implements Comparable<Version> {
         }
     }
 
-    /** @hide */
-    private static String[] parsePATrailingValue(String input) {
-        final String alphaIdentifier = "1";
-        final String betaIdentifier = "2";
-        final String rcIdentifier = "3";
-        final String goldIdentifier = "4";
-
-        if (input.startsWith("-")) {
-            input = input.substring(1);
-        }
-        if (input.length() == 0) {
-            // nothing specified
-            return new String[] {
-                    "", ""
-            };
-        } else if (input.substring(0, 1).matches("[0-9]")) {
-            // release date
-            try {
-                return new String[] {
-                        input.substring(0, 8), input.substring(8)
-                };
-            } catch (final IndexOutOfBoundsException e) {
-                return new String[] {
-                        input, ""
-                };
-            }
-        } else if (input.startsWith("A")) {
-            // phase ALPHA X
-            return new String[] {
-                    PA_PHASE_ARRAY_MARKER, alphaIdentifier,
-                    input.substring(input.startsWith("ALPHA") ? 5 : 1)
-            };
-        } else if (input.startsWith("B")) {
-            // phase BETA X
-            return new String[] {
-                    PA_PHASE_ARRAY_MARKER, betaIdentifier,
-                    input.startsWith("BETA") ? input.length() > 4 ? input.substring(4) : "0"
-                            : input.length() > 1 ? input.substring(1) : "0"
-            };
-        } else if (input.startsWith("RC")) {
-            // phase RC X
-            return new String[] {
-                    PA_PHASE_ARRAY_MARKER, rcIdentifier,
-                    input.length() > 2 ? input.substring(2) : "0"
-            };
-        } else {
-            // unknown - assume phase GOLD 0
-            return new String[] {
-                    PA_PHASE_ARRAY_MARKER, goldIdentifier, "0"
-            };
-        }
-    }
-
     /**
      * Parses a PA package version meta-data into a SemVer-style version object.
      * Invalid input meta-data will simply return an SemVer object with reset
@@ -200,6 +219,7 @@ public final class Version implements Comparable<Version> {
      * 
      * @param version the PA package version meta-data
      * @return the parsed SemVer object
+     * @see #parsePA(String)
      */
     public static Version parseSafePA(final String version) {
         try {
