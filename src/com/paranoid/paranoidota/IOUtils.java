@@ -40,9 +40,6 @@ import java.util.Scanner;
 /** Generic convenience class containing I/O helper tools. */
 public class IOUtils {
 
-    /** Logging tag for the class. */
-    private static final String TAG = "IOUtils";
-
     /** The main dictionary containing device names for later replacements. */
     private static Properties sDeviceDictionary;
 
@@ -55,35 +52,11 @@ public class IOUtils {
     /** Boolean value informing whether the mount points have to be checked. */
     private static boolean sShouldCheckMounts = true;
 
+    /** Logging tag for the class. */
+    private static final String TAG = "IOUtils";
+
     static {
         checkMounts();
-    }
-
-    /** @return {@code true} if the primary external storage is present & mounted */
-    public static boolean isExternalStorageMounted() {
-        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-    }
-
-    /** @return the mount point of the primary SD card */
-    public static String getPrimarySdCard() {
-        if (sMountPointPrimarySdcard == null) {
-            if (sShouldCheckMounts) {
-                checkMounts();
-            } else {
-                sMountPointPrimarySdcard = Environment.getExternalStorageDirectory()
-                        .getAbsolutePath();
-            }
-        }
-
-        return sMountPointPrimarySdcard;
-    }
-
-    /**
-     * @return the mount point of the secondary SD card or a null value if no
-     *         such mount point has been located
-     */
-    public static String getSecondarySdCard() {
-        return sMountPointSecondarySdcard;
     }
 
     /** Checks for the primary and secondary external storages. */
@@ -210,13 +183,6 @@ public class IOUtils {
         return null;
     }
 
-    /** @return count of gigabytes of space left on the primary external storage */
-    public static double getGbLeftOnPrimarySdCard() {
-        final StatFs stat = new StatFs(getPrimarySdCard());
-        return ((double) stat.getAvailableBlocksLong() * (double) stat.getBlockSizeLong())
-                / (1024 * 1024 * 1024);
-    }
-
     /**
      * @param bytes count of bytes
      * @param si {@code true} if the blocks should be exactly 1000 units large;
@@ -233,46 +199,6 @@ public class IOUtils {
         final int exp = (int) (Math.log(bytes) / Math.log(unit));
         return String.format(Locale.US, "%.1f %sB", bytes / Math.pow(unit, exp),
                 (si ? "kMG" : "KMG").charAt(exp - 1) + (si ? "" : "i")).replace(",", ".");
-    }
-
-    /**
-     * @param file the source file
-     * @return the generated md5 checksum
-     * @throws FileNotFoundException in the case of the requested file not
-     *             existing and being available for checking
-     */
-    public static String md5(File file) throws FileNotFoundException {
-        MessageDigest digest = null;
-        try {
-            digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD5 is not a valid and available algorithm.", e);
-        }
-
-        final InputStream is = new FileInputStream(file);
-
-        byte[] buffer = new byte[8192];
-        int read = 0;
-
-        try {
-            while ((read = is.read(buffer)) > 0) {
-                digest.update(buffer, 0, read);
-            }
-        } catch (IOException e) {
-            // in the case of a reading failure, we just roll with what we got
-        }
-
-        try {
-            is.close();
-        } catch (IOException e) {
-            // we tried - we failed - move on
-        }
-
-        String md5 = new BigInteger(1, digest.digest()).toString(16);
-        while (md5.length() < 32) {
-            md5 = "0" + md5;
-        }
-        return md5;
     }
 
     /**
@@ -317,6 +243,35 @@ public class IOUtils {
         return dir;
     }
 
+    /** @return count of gigabytes of space left on the primary external storage */
+    public static double getGbLeftOnPrimarySdCard() {
+        final StatFs stat = new StatFs(getPrimarySdCard());
+        return ((double) stat.getAvailableBlocksLong() * (double) stat.getBlockSizeLong())
+                / (1024 * 1024 * 1024);
+    }
+
+    /** @return the mount point of the primary SD card */
+    public static String getPrimarySdCard() {
+        if (sMountPointPrimarySdcard == null) {
+            if (sShouldCheckMounts) {
+                checkMounts();
+            } else {
+                sMountPointPrimarySdcard = Environment.getExternalStorageDirectory()
+                        .getAbsolutePath();
+            }
+        }
+
+        return sMountPointPrimarySdcard;
+    }
+
+    /**
+     * @return the mount point of the secondary SD card or a null value if no
+     *         such mount point has been located
+     */
+    public static String getSecondarySdCard() {
+        return sMountPointSecondarySdcard;
+    }
+
     /**
      * @return {@code true} if the <i>.android-secure</i> directory exists on
      *         the primary external storage
@@ -334,6 +289,51 @@ public class IOUtils {
     public static boolean hasSdExt() {
         final File f = new File("/sd-ext");
         return f.exists() && f.isDirectory();
+    }
+
+    /** @return {@code true} if the primary external storage is present & mounted */
+    public static boolean isExternalStorageMounted() {
+        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+    }
+
+    /**
+     * @param file the source file
+     * @return the generated md5 checksum
+     * @throws FileNotFoundException in the case of the requested file not
+     *             existing and being available for checking
+     */
+    public static String md5(File file) throws FileNotFoundException {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 is not a valid and available algorithm.", e);
+        }
+
+        final InputStream is = new FileInputStream(file);
+
+        byte[] buffer = new byte[8192];
+        int read = 0;
+
+        try {
+            while ((read = is.read(buffer)) > 0) {
+                digest.update(buffer, 0, read);
+            }
+        } catch (IOException e) {
+            // in the case of a reading failure, we just roll with what we got
+        }
+
+        try {
+            is.close();
+        } catch (IOException e) {
+            // we tried - we failed - move on
+        }
+
+        String md5 = new BigInteger(1, digest.digest()).toString(16);
+        while (md5.length() < 32) {
+            md5 = "0" + md5;
+        }
+        return md5;
     }
 
     /** @hide */
