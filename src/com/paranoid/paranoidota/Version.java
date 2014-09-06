@@ -362,6 +362,7 @@ public final class Version implements Comparable<Version> {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public int compareTo(final Version another) {
         final int major = another.getMajorVersion();
@@ -430,20 +431,21 @@ public final class Version implements Comparable<Version> {
         return 0;
     }
 
+    /** {@inheritDoc} */
     @Override
-    public boolean equals(final Object o) {
-        // The objects are identical. (just for optimization)
-        if (this == o) {
+    public boolean equals(final Object another) {
+        // The objects are identical for sure.
+        if (this == another) {
             return true;
         }
 
         // The other object has the wrong type.
-        if (!(o instanceof Version)) {
+        if (!(another instanceof Version)) {
             return false;
         }
 
         // Cast and check all the fields.
-        final Version v = (Version) o;
+        final Version v = (Version) another;
         return mMajorVersion == v.mMajorVersion && mMinorVersion == v.mMinorVersion
                 && mPatchVersion == v.mPatchVersion
                 && Arrays.equals(mPreReleaseVersion, v.mPreReleaseVersion);
@@ -474,6 +476,7 @@ public final class Version implements Comparable<Version> {
         return mPreReleaseVersion;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         throw new UnsupportedOperationException();
@@ -520,6 +523,7 @@ public final class Version implements Comparable<Version> {
         return out;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return getClass().getName() + "[" + "majorVersion=" + mMajorVersion + ", "

@@ -29,6 +29,7 @@ import com.paranoid.paranoidota.activities.MainActivity;
 /** Download completion and notification listener. */
 public class DownloadReceiver extends BroadcastReceiver {
 
+    /** {@inheritDoc} */
     @Override
     public void onReceive(final Context context, final Intent intent) {
         context.startActivity(new Intent(context, MainActivity.class)
@@ -38,6 +39,25 @@ public class DownloadReceiver extends BroadcastReceiver {
                 .putExtra(Utils.Extras.CHECK_DOWNLOADS_FINISHED.getName(), true)
                 .putExtra(Utils.Extras.CHECK_DOWNLOADS_ID.getName(),
                         intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0)));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object another) {
+        // All DownloadReceiver objects are identical.
+        return another instanceof DownloadReceiver;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return getClass().getName();
     }
 
 }

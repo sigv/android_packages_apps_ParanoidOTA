@@ -35,6 +35,7 @@ public class NotificationAlarmReceiver extends BroadcastReceiver {
     /** The cached ROM updater instance. */
     private RomUpdater mRomUpdater;
 
+    /** {@inheritDoc} */
     @Override
     public void onReceive(Context context, Intent intent) {
         if (mRomUpdater == null) {
@@ -49,6 +50,37 @@ public class NotificationAlarmReceiver extends BroadcastReceiver {
             mRomUpdater.check();
             mGappsUpdater.check();
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object another) {
+        // The objects are identical for sure.
+        if (this == another) {
+            return true;
+        }
+
+        // The other object has the wrong type.
+        if (!(another instanceof NotificationAlarmReceiver)) {
+            return false;
+        }
+
+        // Cast and check all the fields.
+        final NotificationAlarmReceiver r = (NotificationAlarmReceiver) another;
+        return mGappsUpdater.equals(r.mGappsUpdater) && mRomUpdater.equals(r.mRomUpdater);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return getClass().getName() + "[" + "gappsUpdater=" + mGappsUpdater + ", " +
+            "romUpdater=" + mRomUpdater + "]";
     }
 
 }

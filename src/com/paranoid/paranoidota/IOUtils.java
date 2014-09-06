@@ -340,4 +340,23 @@ public class IOUtils {
     private IOUtils() {
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object another) {
+        // All IOUtils objects are identical.
+        return another instanceof IOUtils;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return getClass().getName();
+    }
+
 }

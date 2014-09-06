@@ -515,4 +515,23 @@ public class Utils {
     private Utils() {
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object another) {
+        // All Utils objects are identical.
+        return another instanceof Utils;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return getClass().getName();
+    }
+
 }

@@ -28,10 +28,30 @@ import com.paranoid.paranoidota.Utils.AlarmType;
 /** Device boot event listener. */
 public class BootReceiver extends BroadcastReceiver {
 
+    /** {@inheritDoc} */
     @Override
     public void onReceive(final Context context, final Intent intent) {
         Utils.setAlarm(context, AlarmType.ROM, true);
         Utils.setAlarm(context, AlarmType.GAPPS, true);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object another) {
+        // All BootReceiver objects are identical.
+        return another instanceof BootReceiver;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return getClass().getName();
     }
 
 }

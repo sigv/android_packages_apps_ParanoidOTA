@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 
 /** Network data reader parser. */
 public class NetStringReader extends AsyncTask<String, Void, NetStringResult> {
@@ -93,6 +94,7 @@ public class NetStringReader extends AsyncTask<String, Void, NetStringResult> {
         mListeners = listeners;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected NetStringResult doInBackground(final String... params) {
         final StringBuffer string = new StringBuffer();
@@ -129,6 +131,7 @@ public class NetStringReader extends AsyncTask<String, Void, NetStringResult> {
         return new NetStringResult(string.toString());
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void onPostExecute(NetStringResult result) {
         super.onPostExecute(result);
@@ -142,6 +145,36 @@ public class NetStringReader extends AsyncTask<String, Void, NetStringResult> {
                 }
             }
         }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean equals(final Object another) {
+        // The objects are identical for sure.
+        if (this == another) {
+            return true;
+        }
+
+        // The other object has the wrong type.
+        if (!(another instanceof NetStringReader)) {
+            return false;
+        }
+
+        // Cast and check all the fields.
+        final NetStringReader r = (NetStringReader) another;
+        return Arrays.equals(mListeners, r.mListeners);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int hashCode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return getClass().getName() + "[" + "listeners=" + Arrays.toString(mListeners) + "]";
     }
 
 }
