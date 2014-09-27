@@ -20,7 +20,6 @@
 package com.paranoid.paranoidota.updater;
 
 import com.paranoid.paranoidota.Version;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
 import org.json.JSONObject;
 
@@ -30,7 +29,7 @@ public interface Server {
 
     public String getUrl(String device, Version version);
 
-    public List<PackageInfo> createPackageInfoList(JSONObject response) throws Exception;
+    public List<UpdatePackage> createPackageList(JSONObject response) throws Exception;
 
     public String getError();
 }

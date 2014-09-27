@@ -41,7 +41,7 @@ import com.paranoid.paranoidota.activities.MainActivity;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.Updater;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
+import com.paranoid.paranoidota.updater.UpdatePackage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -108,13 +108,13 @@ public class Utils {
         private static final long serialVersionUID = -9013072595529661176L;
 
         /** Information about the GApps packages gathered in the latest update. */
-        public final PackageInfo[] mGappsPackages;
+        public final UpdatePackage[] mGappsPackages;
 
         /** The ID of the current notification in question. */
         public final int mNotificationId;
 
         /** Information about the ROM packages in the latest update. */
-        public final PackageInfo[] mRomPackages;
+        public final UpdatePackage[] mRomPackages;
 
         /**
          * Initializes an information object.
@@ -123,8 +123,8 @@ public class Utils {
          * @param romPackages information about ROM packages
          * @param gappsPackages information about the GApps packages
          */
-        public NotificationInfo(int notificationId, PackageInfo[] romPackages,
-                PackageInfo[] gappsPackages) {
+        public NotificationInfo(int notificationId, UpdatePackage[] romPackages,
+                UpdatePackage[] gappsPackages) {
             mNotificationId = notificationId;
             mRomPackages = romPackages;
             mGappsPackages = gappsPackages;
@@ -152,13 +152,13 @@ public class Utils {
     }
 
     /** Information about the latest GApps packages. */
-    private static PackageInfo[] sGappsPackages = new PackageInfo[0];
+    private static UpdatePackage[] sGappsPackages = new UpdatePackage[0];
 
     /** The Roboto Thin/Light typeface to be used for themeing. */
     private static Typeface sRobotoThin;
 
     /** Information about the latest ROM packages. */
-    private static PackageInfo[] sRomPackages = new PackageInfo[0];
+    private static UpdatePackage[] sRomPackages = new UpdatePackage[0];
 
     /**
      * Checks whether the specified alarm already exists.
@@ -392,8 +392,8 @@ public class Utils {
      * @param romInfo the information about the ROM packages
      * @param gappsInfo the information about the GApps packages
      */
-    public static void showNotification(Context context, Updater.PackageInfo[] romInfo,
-            Updater.PackageInfo[] gappsInfo) {
+    public static void showNotification(Context context, UpdatePackage[] romInfo,
+            UpdatePackage[] gappsInfo) {
         romInfo = romInfo != null ? (sRomPackages = romInfo) : sRomPackages;
         gappsInfo = gappsInfo != null ? (sGappsPackages = gappsInfo) : sGappsPackages;
 

@@ -62,8 +62,8 @@ import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
 import com.paranoid.paranoidota.updater.Updater;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 import com.paranoid.paranoidota.updater.Updater.UpdaterListener;
+import com.paranoid.paranoidota.updater.UpdatePackage;
 import com.paranoid.paranoidota.widget.Card;
 
 import java.util.ArrayList;
@@ -338,7 +338,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
     }
 
     @Override
-    public void versionFound(PackageInfo[] info, boolean isRom) {
+    public void versionFound(UpdatePackage[] info, boolean isRom) {
     }
 
     @Override
@@ -367,7 +367,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
         setState(state, animate, null, null, null, false, fromRotation);
     }
 
-    public void setState(int state, boolean animate, PackageInfo[] infos,
+    public void setState(int state, boolean animate, UpdatePackage[] infos,
             Uri uri, String md5, boolean isRom, boolean fromRotation) {
         mState = state;
         switch (state) {

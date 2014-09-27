@@ -31,16 +31,16 @@ import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 import com.paranoid.paranoidota.updater.Updater.UpdaterListener;
+import com.paranoid.paranoidota.updater.UpdatePackage;
 
 public class SystemActivity extends Activity implements UpdaterListener {
 
     private RomUpdater mRomUpdater;
     private GappsUpdater mGappsUpdater;
 
-    private PackageInfo mRom;
-    private PackageInfo mGapps;
+    private UpdatePackage mRom;
+    private UpdatePackage mGapps;
 
     private TextView mTitle;
     private TextView mMessage;
@@ -87,7 +87,7 @@ public class SystemActivity extends Activity implements UpdaterListener {
     }
 
     @Override
-    public void versionFound(PackageInfo[] info, boolean isRom) {
+    public void versionFound(UpdatePackage[] info, boolean isRom) {
         setMessages(info, isRom);
     }
 
@@ -95,7 +95,7 @@ public class SystemActivity extends Activity implements UpdaterListener {
     public void checkError(String cause, boolean isRom) {
     }
 
-    private void setMessages(PackageInfo[] info, boolean isRom) {
+    private void setMessages(UpdatePackage[] info, boolean isRom) {
         if (info != null && info.length > 0) {
             if (isRom) {
                 mRom = info.length > 0 ? info[0] : null;

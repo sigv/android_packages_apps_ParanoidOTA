@@ -217,18 +217,18 @@ public class DownloadHelper {
         return false;
     }
 
-    public static void downloadFile(final String url, final String fileName, final String md5,
+    public static void downloadFile(final URL url, final String fileName, final String md5,
             final boolean isRom) {
 
         sUpdateHandler.post(sUpdateProgress);
         sCallback.onDownloadStarted();
 
-        if (url.contains("goo.im")) {
+        if (url.getHost().contains("goo.im")) {
 
             if (sSettingsHelper.isLogged()) {
 
                 String login = sSettingsHelper.getLogin();
-                String lurl = url + "&hash=" + login;
+                String lurl = url.toExternalForm() + "&hash=" + login;
                 realDownloadFile(lurl, fileName, md5, isRom);
 
             } else {
@@ -240,8 +240,7 @@ public class DownloadHelper {
 
                         InputStream is = null;
                         try {
-                            URL getUrl = new URL(url);
-                            URLConnection conn = getUrl.openConnection();
+                            URLConnection conn = url.openConnection();
                             conn.connect();
                             is = new BufferedInputStream(conn.getInputStream());
                             byte[] buf = new byte[4096];
@@ -251,7 +250,7 @@ public class DownloadHelper {
                                 Thread.sleep(10500);
                             } catch (InterruptedException e) {
                             }
-                            realDownloadFile(url, fileName, md5, isRom);
+                            realDownloadFile(url.toExternalForm(), fileName, md5, isRom);
                             readdCallback();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -270,13 +269,14 @@ public class DownloadHelper {
             }
 
         } else {
-            realDownloadFile(url, fileName, md5, isRom);
+            realDownloadFile(url.toExternalForm(), fileName, md5, isRom);
         }
 
     }
 
-    private static void realDownloadFile(String url, String fileName, String md5, boolean isRom) {
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+    private static void realDownloadFile(String urlString, String fileName, String md5,
+            boolean isRom) {
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(urlString));
         request.setNotificationVisibility(Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setVisibleInDownloadsUi(false);
         request.setTitle(sContext.getResources().getString(R.string.download_title,

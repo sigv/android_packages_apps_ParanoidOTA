@@ -32,12 +32,13 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.paranoid.paranoidota.IOUtils;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.activities.MainActivity;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
+import com.paranoid.paranoidota.updater.UpdatePackage;
 import com.paranoid.paranoidota.updater.Updater.UpdaterListener;
 import com.paranoid.paranoidota.widget.Card;
 import com.paranoid.paranoidota.widget.Item;
@@ -76,11 +77,11 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
         mGappsUpdater.addUpdaterListener(this);
 
         if (savedInstanceState != null) {
-            List<PackageInfo> mRoms = (List) savedInstanceState.getSerializable(ROMS);
-            List<PackageInfo> mGapps = (List) savedInstanceState.getSerializable(GAPPS);
+            List<UpdatePackage> mRoms = (List) savedInstanceState.getSerializable(ROMS);
+            List<UpdatePackage> mGapps = (List) savedInstanceState.getSerializable(GAPPS);
 
-            mRomUpdater.setLastUpdates(mRoms.toArray(new PackageInfo[mRoms.size()]));
-            mGappsUpdater.setLastUpdates(mGapps.toArray(new PackageInfo[mGapps.size()]));
+            mRomUpdater.setLastUpdates(mRoms.toArray(new UpdatePackage[mRoms.size()]));
+            mGappsUpdater.setLastUpdates(mGapps.toArray(new UpdatePackage[mGapps.size()]));
         }
 
         setLayoutId(R.layout.card_updates);
@@ -147,8 +148,8 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
     @Override
     public void saveState(Bundle outState) {
         super.saveState(outState);
-        ArrayList<PackageInfo> mRoms = new ArrayList<PackageInfo>();
-        ArrayList<PackageInfo> mGapps = new ArrayList<PackageInfo>();
+        ArrayList<UpdatePackage> mRoms = new ArrayList<UpdatePackage>();
+        ArrayList<UpdatePackage> mGapps = new ArrayList<UpdatePackage>();
 
         mRoms.addAll(Arrays.asList(mRomUpdater.getLastUpdates()));
         mGapps.addAll(Arrays.asList(mGappsUpdater.getLastUpdates()));
@@ -182,8 +183,8 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
             mAdditional.addView(mAdditionalText);
         } else {
             mLayout.addView(mInfo);
-            PackageInfo[] roms = mRomUpdater.getLastUpdates();
-            PackageInfo[] gapps = mGappsUpdater.getLastUpdates();
+            UpdatePackage[] roms = mRomUpdater.getLastUpdates();
+            UpdatePackage[] gapps = mGappsUpdater.getLastUpdates();
             if ((roms == null || roms.length == 0) && (gapps == null || gapps.length == 0)) {
                 setTitle(R.string.updates_uptodate);
                 mInfo.setText(R.string.no_updates_found);
@@ -222,7 +223,7 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
     }
 
     @Override
-    public void versionFound(PackageInfo[] info, boolean isRom) {
+    public void versionFound(UpdatePackage[] info, boolean isRom) {
         updateText();
     }
 
@@ -247,17 +248,17 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
         if (!isChecked) {
             return;
         }
-        PackageInfo info = (PackageInfo) buttonView.getTag(R.id.title);
+        UpdatePackage info = (UpdatePackage) buttonView.getTag(R.id.title);
         unckeckCheckBoxes(info);
     }
 
-    private void unckeckCheckBoxes(PackageInfo master) {
+    private void unckeckCheckBoxes(UpdatePackage master) {
         String masterFileName = master.getFilename();
         boolean masterIsGapps = master.isGapps();
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             View view = mLayout.getChildAt(i);
             if (view instanceof CheckBox) {
-                PackageInfo info = (PackageInfo) view.getTag(R.id.title);
+                UpdatePackage info = (UpdatePackage) view.getTag(R.id.title);
                 String fileName = info.getFilename();
                 boolean isGapps = info.isGapps();
                 if (masterIsGapps == isGapps && !masterFileName.equals(fileName)) {
@@ -267,21 +268,21 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
         }
     }
 
-    private PackageInfo[] getPackages() {
-        List<PackageInfo> list = new ArrayList<PackageInfo>();
+    private UpdatePackage[] getPackages() {
+        List<UpdatePackage> list = new ArrayList<UpdatePackage>();
         for (int i = 0; i < mLayout.getChildCount(); i++) {
             View view = mLayout.getChildAt(i);
             if (view instanceof CheckBox) {
                 if (((CheckBox) view).isChecked()) {
-                    PackageInfo info = (PackageInfo) view.getTag(R.id.title);
+                    UpdatePackage info = (UpdatePackage) view.getTag(R.id.title);
                     list.add(info);
                 }
             }
         }
-        return list.toArray(new PackageInfo[list.size()]);
+        return list.toArray(new UpdatePackage[list.size()]);
     }
 
-    private void addPackages(PackageInfo[] packages) {
+    private void addPackages(UpdatePackage[] packages) {
         Context context = getContext();
         Resources res = context.getResources();
         for (int i = 0; packages != null && i < packages.length; i++) {
@@ -300,7 +301,7 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
                     LayoutParams.WRAP_CONTENT));
             mAdditional.addView(text);
             text = new TextView(context);
-            text.setText(packages[i].getSize());
+            text.setText(IOUtils.formatHumanReadableByteCount(packages[i].getSizeBytes(), false));
             text.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     res.getDimension(R.dimen.card_small_text_size));
             text.setTextColor(R.color.card_text);
@@ -308,7 +309,7 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
                     LayoutParams.WRAP_CONTENT));
             mAdditional.addView(text);
             text = new TextView(context);
-            text.setText(res.getString(R.string.update_host, packages[i].getHost()));
+            text.setText(res.getString(R.string.update_host, packages[i].getUrl().getHost()));
             text.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     res.getDimension(R.dimen.card_small_text_size));
             text.setTextColor(R.color.card_text);

@@ -32,7 +32,7 @@ import com.paranoid.paranoidota.activities.MainActivity;
 import com.paranoid.paranoidota.helpers.DownloadHelper;
 import com.paranoid.paranoidota.helpers.DownloadHelper.DownloadCallback;
 import com.paranoid.paranoidota.signalv.R;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
+import com.paranoid.paranoidota.updater.UpdatePackage;
 import com.paranoid.paranoidota.widget.Card;
 import com.paranoid.paranoidota.widget.Item;
 import com.paranoid.paranoidota.widget.Item.OnItemClickListener;
@@ -47,10 +47,10 @@ public class DownloadCard extends Card implements DownloadCallback {
     private ProgressBar mProgressBar;
     private TextView mProgress;
     private Item mCancel;
-    private PackageInfo[] mDownloading;
+    private UpdatePackage[] mDownloading;
     private int mDownloadProgress = -1;
 
-    public DownloadCard(Context context, AttributeSet attrs, PackageInfo[] infos,
+    public DownloadCard(Context context, AttributeSet attrs, UpdatePackage[] infos,
             Bundle savedInstanceState) {
         super(context, attrs, savedInstanceState);
 
@@ -82,7 +82,7 @@ public class DownloadCard extends Card implements DownloadCallback {
         setInitialInfos(infos);
 
         if (infos == null && savedInstanceState != null) {
-            infos = (PackageInfo[]) savedInstanceState.getSerializable(DOWNLOADING);
+            infos = (UpdatePackage[]) savedInstanceState.getSerializable(DOWNLOADING);
             mDownloadProgress = savedInstanceState.getInt(DOWNLOAD_PROGRESS);
             setInfos(infos, mDownloadProgress);
         } else {
@@ -95,7 +95,7 @@ public class DownloadCard extends Card implements DownloadCallback {
         }
     }
 
-    public void setInitialInfos(PackageInfo[] infos) {
+    public void setInitialInfos(UpdatePackage[] infos) {
         Context context = getContext();
 
         String names = "";
@@ -117,7 +117,7 @@ public class DownloadCard extends Card implements DownloadCallback {
 
         for (int i = 0; infos != null && i < infos.length; i++) {
             DownloadHelper.registerCallback(mActivity);
-            DownloadHelper.downloadFile(infos[i].getPath(),
+            DownloadHelper.downloadFile(infos[i].getUrl(),
                     infos[i].getFilename(), infos[i].getMd5(),
                     !infos[i].isGapps());
         }
@@ -130,7 +130,7 @@ public class DownloadCard extends Card implements DownloadCallback {
         outState.putInt(DOWNLOAD_PROGRESS, mDownloadProgress);
     }
 
-    private void setInfos(PackageInfo[] infos, int progress) {
+    private void setInfos(UpdatePackage[] infos, int progress) {
         Context context = getContext();
         String names = "";
         for (int i = 0; infos != null && i < infos.length; i++) {

@@ -21,95 +21,90 @@ package com.paranoid.paranoidota.updater;
 
 import com.paranoid.paranoidota.IOUtils;
 import com.paranoid.paranoidota.Version;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
 import java.io.Serializable;
+import java.net.URL;
 
-public class UpdatePackage implements PackageInfo, Serializable {
+/**
+ * The update package meta-data object.
+ */
+public class UpdatePackage implements Serializable {
 
-    private String mMd5 = null;
-    private String mIncrementalMd5 = null;
-    private String mFilename = null;
-    private String mIncrementalFilename = null;
-    private String mPath = null;
-    private String mHost = null;
-    private String mSize = null;
-    private String mIncrementalPath = null;
-    private Version mVersion;
-    private boolean mIsDelta = false;
-    private boolean mIsGapps = false;
+    /** Device name to be used for Google Apps packages. */
+    public static final String DEVICE_NAME_GAPPS = "-gapps-";
 
-    public UpdatePackage(String device, String name, Version version, long size, String url,
-            String md5, boolean gapps) {
-        this(device, name, version,
-                IOUtils.formatHumanReadableByteCount(size, false), url, md5, gapps);
+    /** The name of the device on which this package should be installed. */
+    private final String mDeviceName;
+
+    /** The version information. */
+    private final Version mVersion;
+
+    /** The name of this package's image file. */
+    private final String mFilename;
+
+    /** The size of this package's image file in bytes. */
+    private final long mSizeBytes;
+
+    /** The MD5 of this package's image file. */
+    private final String mMd5;
+
+    /** The URL which this package's image file can be downloaded from. */
+    private final URL mUrl;
+
+    /**
+     * Initialize the package meta-data object.
+     *
+     * @param deviceName the name of the device on which this package should be installed
+     * @param version the version information
+     * @param filename the name of this package's image file
+     * @param sizeBytes the size of this package's image file in bytes
+     * @param md5 the MD5 of this package's image file
+     * @param url the URL which this package's image file can be downloaded from
+     */
+    public UpdatePackage(final String deviceName, final Version version, final String filename,
+            final long sizeBytes, final String md5, final URL url) {
+        mDeviceName = deviceName;
+        mVersion = version;
+        mFilename = filename;
+        mSizeBytes = sizeBytes;
+        mMd5 = md5;
+        mUrl = url;
     }
 
-    public UpdatePackage(String device, String name, Version version, String size, String url,
-            String md5, boolean gapps) {
-        this.mFilename = name;
-        this.mVersion = version;
-        this.mSize = size;
-        this.mPath = url;
-        this.mMd5 = md5;
-        this.mIsGapps = gapps;
-        mHost = mPath.replace("http://", "");
-        mHost = mHost.replace("https://", "");
-        mHost = mHost.substring(0, mHost.indexOf("/"));
+    /** @return the name of the device on which this package should be installed */
+    public String getDeviceName() {
+        return mDeviceName;
     }
 
-    @Override
-    public boolean isDelta() {
-        return mIsDelta;
+    /** @return whether the package has been tagged to contain Google Apps */
+    public boolean isGapps() {
+        return mDeviceName.equals(DEVICE_NAME_GAPPS);
     }
 
-    @Override
-    public String getDeltaFilename() {
-        return mIncrementalFilename;
-    }
-
-    @Override
-    public String getDeltaPath() {
-        return mIncrementalPath;
-    }
-
-    @Override
-    public String getDeltaMd5() {
-        return mIncrementalMd5;
-    }
-
-    @Override
-    public String getMd5() {
-        return mMd5;
-    }
-
-    @Override
-    public String getFilename() {
-        return mFilename;
-    }
-
-    @Override
-    public String getPath() {
-        return mPath;
-    }
-
-    @Override
-    public String getHost() {
-        return mHost;
-    }
-
-    @Override
+    /** @return the version information */
     public Version getVersion() {
         return mVersion;
     }
 
-    @Override
-    public String getSize() {
-        return mSize;
+    /** @return the name of this package's image file */
+    public String getFilename() {
+        return mFilename;
     }
 
-    @Override
-    public boolean isGapps() {
-        return mIsGapps;
+    /** @return the size of this package's image file in bytes */
+    public long getSizeBytes() {
+        // IOUtils.formatHumanReadableByteCount(size, false);
+        return mSizeBytes;
     }
+
+    /** @return the MD5 of this package's image file */
+    public String getMd5() {
+        return mMd5;
+    }
+
+    /** @return the URL which this package's image file can be downloaded from */
+    public URL getUrl() {
+        return mUrl;
+    }
+
 }

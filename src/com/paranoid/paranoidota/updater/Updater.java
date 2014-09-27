@@ -42,31 +42,6 @@ import java.util.List;
 
 public abstract class Updater implements Response.Listener<JSONObject>, Response.ErrorListener {
 
-    public interface PackageInfo extends Serializable {
-
-        public String getMd5();
-
-        public String getFilename();
-
-        public String getPath();
-
-        public String getHost();
-
-        public String getSize();
-
-        public Version getVersion();
-
-        public boolean isDelta();
-
-        public String getDeltaFilename();
-
-        public String getDeltaPath();
-
-        public String getDeltaMd5();
-
-        public boolean isGapps();
-    }
-
     public static final String PROPERTY_DEVICE = "ro.pa.device";
     public static final String PROPERTY_DEVICE_EXT = "ro.product.device";
 
@@ -76,14 +51,14 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
 
         public void startChecking(boolean isRom);
 
-        public void versionFound(PackageInfo[] info, boolean isRom);
+        public void versionFound(UpdatePackage[] info, boolean isRom);
 
         public void checkError(String cause, boolean isRom);
     }
 
     private Context mContext;
     private Server[] mServers;
-    private PackageInfo[] mLastUpdates = new PackageInfo[0];
+    private UpdatePackage[] mLastUpdates = new UpdatePackage[0];
     private List<UpdaterListener> mListeners = new ArrayList<UpdaterListener>();
     private RequestQueue mQueue;
     private SettingsHelper mSettingsHelper;
@@ -117,13 +92,13 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
         return mSettingsHelper;
     }
 
-    public PackageInfo[] getLastUpdates() {
+    public UpdatePackage[] getLastUpdates() {
         return mLastUpdates;
     }
 
-    public void setLastUpdates(PackageInfo[] infos) {
+    public void setLastUpdates(UpdatePackage[] infos) {
         if (infos == null) {
-            infos = new PackageInfo[0];
+            infos = new UpdatePackage[0];
         }
         mLastUpdates = infos;
     }
@@ -168,13 +143,13 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
     public void onResponse(JSONObject response) {
         mScanning = false;
         try {
-            PackageInfo[] lastUpdates = null;
+            UpdatePackage[] lastUpdates = null;
             setLastUpdates(null);
-            List<PackageInfo> list = mServer.createPackageInfoList(response);
+            List<UpdatePackage> list = mServer.createPackageList(response);
             String error = mServer.getError();
             if (!isRom()) {
                 int gappsType = mSettingsHelper.getGappsType();
-                PackageInfo info = null;
+                UpdatePackage info = null;
                 for (int i = 0; i < list.size(); i++) {
                     info = list.get(i);
                     String fileName = info.getFilename();
@@ -193,7 +168,7 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
                     }
                 }
             }
-            lastUpdates = list.toArray(new PackageInfo[list.size()]);
+            lastUpdates = list.toArray(new UpdatePackage[list.size()]);
             if (lastUpdates.length > 0) {
                 mServerWorks = true;
                 if (mFromAlarm) {
@@ -278,7 +253,7 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
         }
     }
 
-    protected void fireCheckCompleted(final PackageInfo[] info) {
+    protected void fireCheckCompleted(final UpdatePackage[] info) {
         if (mContext instanceof Activity) {
             ((Activity) mContext).runOnUiThread(new Runnable() {
 

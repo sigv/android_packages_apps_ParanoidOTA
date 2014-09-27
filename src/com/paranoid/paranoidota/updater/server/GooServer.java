@@ -26,11 +26,11 @@ import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.Server;
 import com.paranoid.paranoidota.updater.UpdatePackage;
-import com.paranoid.paranoidota.updater.Updater.PackageInfo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,8 +62,8 @@ public class GooServer implements Server {
     }
 
     @Override
-    public List<PackageInfo> createPackageInfoList(JSONObject response) throws Exception {
-        List<PackageInfo> list = new ArrayList<PackageInfo>();
+    public List<UpdatePackage> createPackageList(JSONObject response) throws Exception {
+        List<UpdatePackage> list = new ArrayList<UpdatePackage>();
         mError = null;
         JSONArray updates = response.optJSONArray("files");
         if (updates == null) {
@@ -96,17 +96,16 @@ public class GooServer implements Server {
                 }
                 Version version = Version.parseSafePA(filename);
                 if (version.isNewerThanOrEqualTo(mVersion)) {
-                    list.add(new UpdatePackage(mDevice, filename, version, file
-                            .getLong("filesize"), "https://goo.im"
-                            + file.getString("path"), file.getString("md5"),
-                            !mIsRom));
+                    list.add(new UpdatePackage(mIsRom ? mDevice : UpdatePackage.DEVICE_NAME_GAPPS,
+                            version, filename, file.getLong("filesize"), file.getString("md5"),
+                            new URL("https://goo.im" + file.getString("path"))));
                 }
             }
         }
-        Collections.sort(list, new Comparator<PackageInfo>() {
+        Collections.sort(list, new Comparator<UpdatePackage>() {
 
             @Override
-            public int compare(PackageInfo lhs, PackageInfo rhs) {
+            public int compare(UpdatePackage lhs, UpdatePackage rhs) {
                 return lhs.getVersion().compareTo(rhs.getVersion());
             }
 
