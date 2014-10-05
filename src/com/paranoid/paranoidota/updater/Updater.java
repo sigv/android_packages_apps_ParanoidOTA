@@ -42,9 +42,6 @@ import java.util.List;
 
 public abstract class Updater implements Response.Listener<JSONObject>, Response.ErrorListener {
 
-    public static final String PROPERTY_DEVICE = "ro.pa.device";
-    public static final String PROPERTY_DEVICE_EXT = "ro.product.device";
-
     public static interface UpdaterListener {
 
         public void startChecking(boolean isRom);

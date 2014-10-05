@@ -29,6 +29,9 @@ import com.paranoid.paranoidota.updater.server.PaServer;
 
 public class RomUpdater extends Updater {
 
+    public static final String PROPERTY_DEVICE = "ro.pa.device";
+    public static final String PROPERTY_DEVICE_EXT = "ro.product.device";
+
     public static String getVersionString(Context context) {
         return getDevice(context) + "-" + Utils.getProp("ro.modversion");
     }
