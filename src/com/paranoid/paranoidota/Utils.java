@@ -47,6 +47,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Properties;
 
 /** Generic convenience class containing helper tools. */
@@ -395,16 +396,23 @@ public class Utils {
      * @param info the information about the packages
      */
     public static void showNotification(Context context, UpdatePackage[] info) {
+        final ArrayList<UpdatePackage> rom = new ArrayList<UpdatePackage>();
+        final ArrayList<UpdatePackage> gapps = new ArrayList<UpdatePackage>();
+
         if (info != null) {
-            if (info.isGapps()) {
-                sGappsPackages = info;
-            } else {
-                sRomPackages = info;
+            for (final UpdatePackage pack : info) {
+                if (pack.isGapps()) {
+                    gapps.add(pack);
+                } else {
+                    rom.add(pack);
+                }
             }
         }
 
-        final UpdatePackage[] romInfo = sRomPackages;
-        final UpdatePackage[] gappsInfo = sGappsPackages;
+        final UpdatePackage[] romInfo = rom.size() == 0 ? sRomPackages :
+                (sRomPackages = rom.toArray(new UpdatePackage[rom.size()]));
+        final UpdatePackage[] gappsInfo = gapps.size() == 0 ? sGappsPackages :
+                (sGappsPackages = gapps.toArray(new UpdatePackage[gapps.size()]));
 
         final Resources res = context.getResources();
 
