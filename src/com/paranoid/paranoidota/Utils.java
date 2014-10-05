@@ -389,13 +389,19 @@ public class Utils {
      * Displays a notification.
      * 
      * @param context the context to use for the creation of the notification
-     * @param romInfo the information about the ROM packages
-     * @param gappsInfo the information about the GApps packages
+     * @param info the information about the packages
      */
-    public static void showNotification(Context context, UpdatePackage[] romInfo,
-            UpdatePackage[] gappsInfo) {
-        romInfo = romInfo != null ? (sRomPackages = romInfo) : sRomPackages;
-        gappsInfo = gappsInfo != null ? (sGappsPackages = gappsInfo) : sGappsPackages;
+    public static void showNotification(Context context, UpdatePackage[] info) {
+        if (info != null) {
+            if (info.isGapps()) {
+                sGappsPackages = info;
+            } else {
+                sRomPackages = info;
+            }
+        }
+
+        final UpdatePackage[] romInfo = sRomPackages;
+        final UpdatePackage[] gappsInfo = sGappsPackages;
 
         final Resources res = context.getResources();
 

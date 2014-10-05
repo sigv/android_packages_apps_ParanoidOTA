@@ -172,11 +172,7 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
             if (lastUpdates.length > 0) {
                 mServerWorks = true;
                 if (mFromAlarm) {
-                    if (!isRom()) {
-                        Utils.showNotification(getContext(), null, lastUpdates);
-                    } else {
-                        Utils.showNotification(getContext(), lastUpdates, null);
-                    }
+                    Utils.showNotification(getContext(), lastUpdates);
                 }
             } else {
                 if (error != null && !error.isEmpty()) {
