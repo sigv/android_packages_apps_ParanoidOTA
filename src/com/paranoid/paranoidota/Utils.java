@@ -151,6 +151,9 @@ public class Utils {
         }
     }
 
+    /** The notification ID to be used by the application globally. */
+    public static final int NOTIFICATION_ID = 122303225;
+
     /** Information about the latest GApps packages. */
     private static UpdatePackage[] sGappsPackages = new UpdatePackage[0];
 
@@ -405,9 +408,9 @@ public class Utils {
 
         final Resources res = context.getResources();
 
-        final PendingIntent intent = PendingIntent.getActivity(context, Updater.NOTIFICATION_ID,
+        final PendingIntent intent = PendingIntent.getActivity(context, NOTIFICATION_ID,
                 new Intent(context, MainActivity.class).putExtra(Extras.FILES_INFO.getName(),
-                        new NotificationInfo(Updater.NOTIFICATION_ID, romInfo, gappsInfo)),
+                        new NotificationInfo(NOTIFICATION_ID, romInfo, gappsInfo)),
                 PendingIntent.FLAG_UPDATE_CURRENT);
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                 .setContentTitle(res.getString(R.string.new_system_update))
@@ -444,7 +447,7 @@ public class Utils {
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         ((NotificationManager) context
-                .getSystemService(Context.NOTIFICATION_SERVICE)).notify(Updater.NOTIFICATION_ID,
+                .getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID,
                 notification);
     }
 

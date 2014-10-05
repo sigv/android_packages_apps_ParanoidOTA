@@ -212,7 +212,7 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
             mCardsLayout.setAnimation(AnimationUtils.loadAnimation(this, R.anim.up_from_bottom));
 
             if (mNotificationInfo != null) {
-                if (mNotificationInfo.mNotificationId != Updater.NOTIFICATION_ID) {
+                if (mNotificationInfo.mNotificationId != Utils.NOTIFICATION_ID) {
                     checkUpdates();
                 } else {
                     mRomUpdater.setLastUpdates(mNotificationInfo.mRomPackages);

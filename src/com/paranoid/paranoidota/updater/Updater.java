@@ -45,8 +45,6 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
     public static final String PROPERTY_DEVICE = "ro.pa.device";
     public static final String PROPERTY_DEVICE_EXT = "ro.product.device";
 
-    public static final int NOTIFICATION_ID = 122303225;
-
     public static interface UpdaterListener {
 
         public void startChecking(boolean isRom);
