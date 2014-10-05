@@ -29,46 +29,44 @@ import com.paranoid.paranoidota.updater.server.PaServer;
 
 public class RomUpdater extends Updater {
 
-    public static final String PROPERTY_DEVICE = "ro.pa.device";
-    public static final String PROPERTY_DEVICE_EXT = "ro.product.device";
-
-    public static String getVersionString(Context context) {
-        return getDevice(context) + "-" + Utils.getProp("ro.modversion");
-    }
-
-    private static String getDevice(Context context) {
-        String device = Utils.getProp(PROPERTY_DEVICE);
-        if (device == null || device.isEmpty()) {
-            device = Utils.getProp(PROPERTY_DEVICE_EXT);
-            device = Utils.translateDeviceName(context, device);
+    private static String getDevice(final Context context) {
+        String device = Utils.getProp("ro.pa.device");
+        if (device == null || "".equals(device)) {
+            device = Utils.translateDeviceName(context, Utils.getProp("ro.product.device"));
         }
         return device == null ? "" : device.toLowerCase();
     }
 
-    public RomUpdater(Context context, boolean fromAlarm) {
-        super(context, new Server[] {
-                new PaServer(), new GooServer(context, true)
-        }, fromAlarm);
+    public static String getVersionString(final Context context) {
+        return getDevice(context) + "-" + Utils.getProp("ro.modversion");
+    }
+
+    public RomUpdater(final Context context, final boolean fromAlarm) {
+        super(context, fromAlarm, new Server[] { new PaServer(), new GooServer(context, true) },
+                R.string.check_rom_updates_error);
     }
 
     @Override
-    public Version getVersion() {
-        return Version.parseSafePA(getVersionString(getContext()));
+    public RomUpdater addListener(final UpdaterListener listener) {
+        super.addListener(listener);
+        return this;
     }
 
     @Override
-    public boolean isRom() {
-        return true;
+    public RomUpdater removeListener(final UpdaterListener listener) {
+        super.addListener(listener);
+        return this;
     }
 
     @Override
-    public String getDevice() {
-        return getDevice(getContext());
+    public String getSystemCardText(final Context context) {
+        final Version version = Version.parseSafePA(getVersionString(context));
+        return context.getResources().getString(R.string.system_rom, version.toDisplayString());
     }
 
     @Override
-    public int getErrorStringId() {
-        return R.string.check_rom_updates_error;
+    public String getUrl(final Server currentServer) {
+        final Context c = getContext();
+        return currentServer.getUrl(getDevice(c), Version.parseSafePA(getVersionString(c)));
     }
-
 }

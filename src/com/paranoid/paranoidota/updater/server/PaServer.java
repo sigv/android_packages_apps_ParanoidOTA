@@ -26,6 +26,7 @@ import com.paranoid.paranoidota.updater.UpdatePackage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,14 +51,22 @@ public class PaServer implements Server {
     }
 
     @Override
-    public List<UpdatePackage> createPackageList(JSONObject response) throws Exception {
+    public UpdatePackage[] createPackageList(JSONObject response) {
         mError = null;
         List<UpdatePackage> list = new ArrayList<UpdatePackage>();
         mError = response.optString("error");
         if (mError == null || mError.isEmpty()) {
-            JSONArray updates = response.getJSONArray("updates");
+            JSONArray updates = response.optJSONArray("updates");
+            if (updates == null) {
+                // got nothing; return nothing
+                return new UpdatePackage[0];
+            }
             for (int i = updates.length() - 1; i >= 0; i--) {
-                JSONObject file = updates.getJSONObject(i);
+                JSONObject file = updates.optJSONObject(i);
+                if (file == null) {
+                    // just skip this entry
+                    continue;
+                }
                 String filename = file.optString("name");
                 String stripped = filename.replace(".zip", "");
                 String[] parts = stripped.split("-");
@@ -67,9 +76,14 @@ public class PaServer implements Server {
                 }
                 Version version = Version.parseSafePA(filename);
                 if (version.isNewerThanOrEqualTo(mVersion)) {
-                    list.add(new UpdatePackage(mDevice, version, filename,
-                            Long.parseLong(file.getString("size")), file.getString("md5"),
-                            new URL(file.getString("url"))));
+                    try {
+                        list.add(new UpdatePackage(mDevice, version, filename,
+                                Long.parseLong(file.optString("size")), file.optString("md5"),
+                                new URL(file.optString("url"))));
+                    } catch (final MalformedURLException e) {
+                        // take the ship down
+                        throw new RuntimeException("Unable to construct a download link", e);
+                    }
                 }
             }
         }
@@ -82,7 +96,7 @@ public class PaServer implements Server {
 
         });
         Collections.reverse(list);
-        return list;
+        return list.toArray(new UpdatePackage[list.size()]);
     }
 
     @Override

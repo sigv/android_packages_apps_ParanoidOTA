@@ -197,10 +197,8 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
         mRecoveryHelper = new RecoveryHelper(this);
         mRebootHelper = new RebootHelper(mRecoveryHelper);
 
-        mRomUpdater = new RomUpdater(this, false);
-        mRomUpdater.addUpdaterListener(this);
-        mGappsUpdater = new GappsUpdater(this, false);
-        mGappsUpdater.addUpdaterListener(this);
+        mRomUpdater = (new RomUpdater(this, false)).addListener(this);
+        mGappsUpdater = (new GappsUpdater(this, false)).addListener(this);
 
         DownloadHelper.init(this, this);
 
@@ -338,17 +336,17 @@ public class MainActivity extends Activity implements UpdaterListener, DownloadC
     }
 
     @Override
-    public void versionFound(UpdatePackage[] info, boolean isRom) {
-    }
-
-    @Override
-    public void startChecking(boolean isRom) {
+    public void onCheckStart(final Updater source) {
         setProgressBarIndeterminate(true);
         setProgressBarVisibility(true);
     }
 
     @Override
-    public void checkError(String cause, boolean isRom) {
+    public void onCheckFinish(final Updater source, final UpdatePackage[] info) {
+    }
+
+    @Override
+    public void onCheckError(final Updater source, final String reason) {
     }
 
     @Override

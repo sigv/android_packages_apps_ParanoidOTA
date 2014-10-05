@@ -39,6 +39,7 @@ import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.GappsUpdater;
 import com.paranoid.paranoidota.updater.RomUpdater;
 import com.paranoid.paranoidota.updater.UpdatePackage;
+import com.paranoid.paranoidota.updater.Updater;
 import com.paranoid.paranoidota.updater.Updater.UpdaterListener;
 import com.paranoid.paranoidota.widget.Card;
 import com.paranoid.paranoidota.widget.Item;
@@ -71,10 +72,8 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
             GappsUpdater gappsUpdater, Bundle savedInstanceState) {
         super(context, attrs, savedInstanceState);
 
-        mRomUpdater = romUpdater;
-        mRomUpdater.addUpdaterListener(this);
-        mGappsUpdater = gappsUpdater;
-        mGappsUpdater.addUpdaterListener(this);
+        mRomUpdater = romUpdater.addListener(this);
+        mGappsUpdater = gappsUpdater.addListener(this);
 
         if (savedInstanceState != null) {
             List<UpdatePackage> mRoms = (List) savedInstanceState.getSerializable(ROMS);
@@ -212,28 +211,30 @@ public class UpdatesCard extends Card implements UpdaterListener, OnCheckedChang
     }
 
     @Override
-    public void startChecking(boolean isRom) {
-        if (isRom) {
+    public void onCheckStart(final Updater source) {
+        if (source instanceof RomUpdater) {
             mErrorRom = null;
         } else {
             mErrorGapps = null;
         }
+
         collapse();
         updateText();
     }
 
     @Override
-    public void versionFound(UpdatePackage[] info, boolean isRom) {
+    public void onCheckFinish(final Updater source, final UpdatePackage[] info) {
         updateText();
     }
 
     @Override
-    public void checkError(String cause, boolean isRom) {
-        if (isRom) {
-            mErrorRom = cause;
+    public void onCheckError(final Updater source, final String reason) {
+        if (source instanceof RomUpdater) {
+            mErrorRom = reason;
         } else {
-            mErrorGapps = cause;
+            mErrorGapps = reason;
         }
+
         updateText();
     }
 

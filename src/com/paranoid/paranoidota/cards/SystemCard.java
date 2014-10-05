@@ -20,7 +20,6 @@
 package com.paranoid.paranoidota.cards;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -39,15 +38,11 @@ public class SystemCard extends Card {
         setTitle(R.string.system_title);
         setLayoutId(R.layout.card_system);
 
-        Resources res = context.getResources();
-
         TextView romView = (TextView) findLayoutViewById(R.id.rom);
-        romView.setText(res.getString(R.string.system_rom, romUpdater.getVersion()
-                .toDisplayString()));
+        romView.setText(romUpdater.getSystemCardText(context));
 
         TextView gappsView = (TextView) findLayoutViewById(R.id.gapps);
-        gappsView.setText(res.getString(R.string.system_gapps, gappsUpdater.getType(), gappsUpdater
-                .getVersion().toDisplayString()));
+        gappsView.setText(gappsUpdater.getSystemCardText(context));
     }
 
     @Override

@@ -30,6 +30,7 @@ import com.paranoid.paranoidota.updater.UpdatePackage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +63,7 @@ public class GooServer implements Server {
     }
 
     @Override
-    public List<UpdatePackage> createPackageList(JSONObject response) throws Exception {
+    public UpdatePackage[] createPackageList(JSONObject response) {
         List<UpdatePackage> list = new ArrayList<UpdatePackage>();
         mError = null;
         JSONArray updates = response.optJSONArray("files");
@@ -70,7 +71,11 @@ public class GooServer implements Server {
             mError = mContext.getResources().getString(R.string.error_device_not_found_server);
         }
         for (int i = 0; updates != null && i < updates.length(); i++) {
-            JSONObject file = updates.getJSONObject(i);
+            JSONObject file = updates.optJSONObject(i);
+            if (file == null) {
+                // just skip this entry
+                continue;
+            }
             String onlinePath = file.optString("path");
             if (onlinePath != null && !onlinePath.isEmpty() && onlinePath.endsWith(".zip")) {
                 String[] pathParts = onlinePath.split("/");
@@ -96,9 +101,22 @@ public class GooServer implements Server {
                 }
                 Version version = Version.parseSafePA(filename);
                 if (version.isNewerThanOrEqualTo(mVersion)) {
+                    URL url;
+                    try {
+                        url = new URL("https://goo.im" + file.optString("path"));
+                    } catch (final MalformedURLException e) {
+                        // abandon ship
+                        try {
+                            url = new URL("https://goo.im/");
+                        } catch (final MalformedURLException fuck) {
+                            // take the ship down with you
+                            throw new RuntimeException("Unable to construct a download link",
+                                    fuck);
+                        }
+                    }
                     list.add(new UpdatePackage(mIsRom ? mDevice : UpdatePackage.DEVICE_NAME_GAPPS,
-                            version, filename, file.getLong("filesize"), file.getString("md5"),
-                            new URL("https://goo.im" + file.getString("path"))));
+                            version, filename, file.optLong("filesize", 0), file.optString("md5"),
+                            url));
                 }
             }
         }
@@ -111,7 +129,7 @@ public class GooServer implements Server {
 
         });
         Collections.reverse(list);
-        return list;
+        return list.toArray(new UpdatePackage[list.size()]);
     }
 
     @Override

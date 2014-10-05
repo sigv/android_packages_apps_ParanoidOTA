@@ -23,13 +23,11 @@ import com.paranoid.paranoidota.Version;
 
 import org.json.JSONObject;
 
-import java.util.List;
-
 public interface Server {
 
     public String getUrl(String device, Version version);
 
-    public List<UpdatePackage> createPackageList(JSONObject response) throws Exception;
+    public UpdatePackage[] createPackageList(JSONObject response);
 
     public String getError();
 }
