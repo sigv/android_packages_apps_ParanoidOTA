@@ -35,67 +35,68 @@ import java.util.List;
 
 public class PaServer implements Server {
 
-    private static final String URL = "http://api.paranoidandroid.co/updates/%s";
-
     private String mDevice = null;
+
+    private Version mVersion = null;
+
     private String mError = null;
-    private Version mVersion;
+
+    public PaServer() {
+    }
 
     @Override
-    public String getUrl(String device, Version version) {
+    public String getUrl(final String device, final Version version) {
         mDevice = device;
         mVersion = version;
-        return String.format(URL, new Object[] {
-                device
-        });
+
+        return String.format("http://api.paranoidandroid.co/updates/%s", device);
     }
 
     @Override
     public UpdatePackage[] createPackageList(JSONObject response) {
-        mError = null;
-        List<UpdatePackage> list = new ArrayList<UpdatePackage>();
         mError = response.optString("error");
-        if (mError == null || mError.isEmpty()) {
-            JSONArray updates = response.optJSONArray("updates");
-            if (updates == null) {
-                // got nothing; return nothing
-                return new UpdatePackage[0];
+        if (mError != null && !"".equals(mError)) {
+            // error out
+            return new UpdatePackage[0];
+        }
+
+        final JSONArray updates = response.optJSONArray("updates");
+        if (updates == null) {
+            // got nothing - return nothing
+            // TODO provide an error message maybe?
+            return new UpdatePackage[0];
+        }
+
+        final ArrayList<UpdatePackage> list = new ArrayList<UpdatePackage>();
+        for (int i = 0; i < updates.length(); i++) {
+            final JSONObject file = updates.optJSONObject(i);
+            if (file == null) {
+                continue; // whatever; just carry on
             }
-            for (int i = updates.length() - 1; i >= 0; i--) {
-                JSONObject file = updates.optJSONObject(i);
-                if (file == null) {
-                    // just skip this entry
-                    continue;
-                }
-                String filename = file.optString("name");
-                String stripped = filename.replace(".zip", "");
-                String[] parts = stripped.split("-");
-                boolean isNew = parts[parts.length - 1].matches("[-+]?\\d*\\.?\\d+");
-                if (!isNew) {
-                    continue;
-                }
-                Version version = Version.parseSafePA(filename);
-                if (version.isNewerThanOrEqualTo(mVersion)) {
-                    try {
-                        list.add(new UpdatePackage(mDevice, version, filename,
-                                Long.parseLong(file.optString("size")), file.optString("md5"),
-                                new URL(file.optString("url"))));
-                    } catch (final MalformedURLException e) {
-                        // take the ship down
-                        throw new RuntimeException("Unable to construct a download link", e);
-                    }
+
+            final String filename = file.optString("name");
+            final String[] bits = filename.replace(".zip", "").split("-");
+            if (!bits[bits.length - 1].matches("[-+]?\\d*\\.?\\d+")) {
+                continue; // don't add it; just carry on
+            }
+
+            final Version version = Version.parseSafePA(filename);
+            if (version.isNewerThanOrEqualTo(mVersion)) {
+                try {
+                    list.add(new UpdatePackage(mDevice, version, filename,
+                            Long.parseLong(file.optString("size")), file.optString("md5"),
+                            new URL(file.optString("url"))));
+                } catch (final MalformedURLException e) {
+                    // take the ship down
+                    throw new RuntimeException("Unable to construct a download link", e);
                 }
             }
         }
-        Collections.sort(list, new Comparator<UpdatePackage>() {
 
-            @Override
-            public int compare(UpdatePackage lhs, UpdatePackage rhs) {
-                return lhs.getVersion().compareTo(rhs.getVersion());
-            }
-
-        });
+        // TODO investigate what the f**k is up with the reverse (like seriously)
+        Collections.sort(list);
         Collections.reverse(list);
+
         return list.toArray(new UpdatePackage[list.size()]);
     }
 

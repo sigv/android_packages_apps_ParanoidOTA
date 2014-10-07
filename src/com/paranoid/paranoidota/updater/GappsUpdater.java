@@ -103,7 +103,7 @@ public class GappsUpdater extends Updater {
     }
 
     public GappsUpdater(final Context context, final boolean fromAlarm) {
-        super(context, fromAlarm, new Server[] { new GooServer(context, false) },
+        super(context, fromAlarm, new Server[] { new GooServer(context) },
                 R.string.check_gapps_updates_error);
     }
 

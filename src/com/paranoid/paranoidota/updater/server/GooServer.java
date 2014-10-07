@@ -39,96 +39,93 @@ import java.util.List;
 
 public class GooServer implements Server {
 
-    private static final String URL = "https://api.goo.im/files/devs/paranoidandroid/roms/%s?ro_board=%s";
     private static final String GAPPS_RESERVED_WORDS = "-signed|-modular|-full|-mini|-micro|-stock";
 
-    private Context mContext;
-    private String mDevice = null;
-    private String mError = null;
-    private Version mVersion;
-    private boolean mIsRom;
+    private final Context mContext;
 
-    public GooServer(Context context, boolean isRom) {
+    private String mDevice = null;
+
+    private Version mVersion = null;
+
+    private String mError = null;
+
+    public GooServer(final Context context) {
         mContext = context;
-        mIsRom = isRom;
     }
 
     @Override
-    public String getUrl(String device, Version version) {
+    public String getUrl(final String device, final Version version) {
         mDevice = device;
         mVersion = version;
-        return String.format(URL, new Object[] {
-                device, device
-        });
+
+        return String.format("https://api.goo.im/files/devs/paranoidandroid/roms/%s?ro_board=%s",
+                device, device);
     }
 
     @Override
     public UpdatePackage[] createPackageList(JSONObject response) {
-        List<UpdatePackage> list = new ArrayList<UpdatePackage>();
-        mError = null;
-        JSONArray updates = response.optJSONArray("files");
-        if (updates == null) {
+        final JSONArray files = response.optJSONArray("files");
+        if (files == null) {
+            // got nothing - return nothing
             mError = mContext.getResources().getString(R.string.error_device_not_found_server);
+            return new UpdatePackage[0];
         }
-        for (int i = 0; updates != null && i < updates.length(); i++) {
-            JSONObject file = updates.optJSONObject(i);
+
+        final ArrayList<UpdatePackage> list = new ArrayList<UpdatePackage>();
+        for (int i = 0; i < files.length(); i++) {
+            final JSONObject file = files.optJSONObject(i);
             if (file == null) {
-                // just skip this entry
-                continue;
+                continue; // whatever; just carry on
             }
-            String onlinePath = file.optString("path");
-            if (onlinePath != null && !onlinePath.isEmpty() && onlinePath.endsWith(".zip")) {
-                String[] pathParts = onlinePath.split("/");
-                String filename = pathParts[pathParts.length - 1];
-                String stripped = filename.replace(".zip", "");
-                if (!mIsRom) {
-                    stripped = stripped.replaceAll("\\b(" + GAPPS_RESERVED_WORDS + ")\\b", "");
-                }
-                String[] parts = stripped.split("-");
-                boolean isNew = parts[parts.length - 1].matches("[-+]?\\d*\\.?\\d+");
-                if (!isNew) {
-                    if (!mIsRom) {
-                        String part = parts[parts.length - 1];
-                        isNew = Utils.isDouble(part)
-                                || Utils.isDouble(part.substring(0,
-                                        part.length() - 1));
-                        if (!isNew) {
-                            continue;
-                        }
-                    } else {
-                        continue;
-                    }
-                }
-                Version version = Version.parseSafePA(filename);
-                if (version.isNewerThanOrEqualTo(mVersion)) {
-                    URL url;
+
+            final String path = file.optString("path");
+            if (path == null) {
+                continue; // whatever; just carry on
+            }
+            if (path.isEmpty() || !path.endsWith(".zip")) {
+                continue; // whatever; just carry on
+            }
+
+            final String[] bits = path.split("/");
+            final String filename = bits[bits.length - 1];
+
+            final String[] strippedBits = filename.replace(".zip", "")
+                    .replaceAll("\\b(" + GAPPS_RESERVED_WORDS + ")\\b", "").split("-");
+            final String lastStrippedBit = strippedBits[strippedBits.length - 1];
+            if (!lastStrippedBit.matches("[-+]?\\d*\\.?\\d+") &&
+                    !Utils.isDouble(lastStrippedBit) &&
+                    !Utils.isDouble(lastStrippedBit.substring(0, lastStrippedBit.length() - 1))) {
+                continue; // don't add it; just carry on
+            }
+
+            final Version version = Version.parseSafePA(filename);
+            if (version.isNewerThanOrEqualTo(mVersion)) {
+                URL url = null;
+                try {
+                    url = new URL("https://goo.im" + path);
+                } catch (final MalformedURLException e) {
+                    // abandon ship
                     try {
-                        url = new URL("https://goo.im" + file.optString("path"));
-                    } catch (final MalformedURLException e) {
-                        // abandon ship
-                        try {
-                            url = new URL("https://goo.im/");
-                        } catch (final MalformedURLException fuck) {
-                            // take the ship down with you
-                            throw new RuntimeException("Unable to construct a download link",
-                                    fuck);
-                        }
+                        url = new URL("https://goo.im/");
+                    } catch (final MalformedURLException fuuuu) {
+                        // take the ship down with you
+                        final RuntimeException throwable = new RuntimeException(
+                                "Unable to construct a download link", fuuuu);
+                        throwable.addSuppressed(e);
+                        throw throwable;
                     }
-                    list.add(new UpdatePackage(mIsRom ? mDevice : UpdatePackage.DEVICE_NAME_GAPPS,
-                            version, filename, file.optLong("filesize", 0), file.optString("md5"),
-                            url));
                 }
+
+                list.add(new UpdatePackage(filename.contains("pa_gapps") ?
+                        UpdatePackage.DEVICE_NAME_GAPPS : mDevice, version, filename,
+                        file.optLong("filesize", 0), file.optString("md5"), url));
             }
         }
-        Collections.sort(list, new Comparator<UpdatePackage>() {
 
-            @Override
-            public int compare(UpdatePackage lhs, UpdatePackage rhs) {
-                return lhs.getVersion().compareTo(rhs.getVersion());
-            }
-
-        });
+        // TODO investigate what the f**k is up with the reverse (like seriously)
+        Collections.sort(list);
         Collections.reverse(list);
+
         return list.toArray(new UpdatePackage[list.size()]);
     }
 

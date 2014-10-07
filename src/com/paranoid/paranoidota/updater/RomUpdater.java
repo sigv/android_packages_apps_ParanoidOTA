@@ -42,7 +42,7 @@ public class RomUpdater extends Updater {
     }
 
     public RomUpdater(final Context context, final boolean fromAlarm) {
-        super(context, fromAlarm, new Server[] { new PaServer(), new GooServer(context, true) },
+        super(context, fromAlarm, new Server[] { new PaServer(), new GooServer(context) },
                 R.string.check_rom_updates_error);
     }
 

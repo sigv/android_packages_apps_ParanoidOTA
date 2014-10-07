@@ -24,10 +24,9 @@ import com.paranoid.paranoidota.Version;
 import org.json.JSONObject;
 
 public interface Server {
+    public String getUrl(final String device, final Version version);
 
-    public String getUrl(String device, Version version);
-
-    public UpdatePackage[] createPackageList(JSONObject response);
+    public UpdatePackage[] createPackageList(final JSONObject response);
 
     public String getError();
 }

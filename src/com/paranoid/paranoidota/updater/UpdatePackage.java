@@ -28,7 +28,7 @@ import java.net.URL;
 /**
  * The update package meta-data object.
  */
-public class UpdatePackage implements Serializable {
+public class UpdatePackage implements Comparable<UpdatePackage>, Serializable {
 
     /** Device name to be used for Google Apps packages. */
     public static final String DEVICE_NAME_GAPPS = "-gapps-";
@@ -105,6 +105,15 @@ public class UpdatePackage implements Serializable {
     /** @return the URL which this package's image file can be downloaded from */
     public URL getUrl() {
         return mUrl;
+    }
+
+    /** {@inheritDoc} */
+    public int compareTo(final UpdatePackage another) {
+        if (another == null) {
+            return -1; // whatever
+        }
+
+        return getVersion().compareTo(another.getVersion());
     }
 
 }
