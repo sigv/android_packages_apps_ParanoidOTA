@@ -60,8 +60,8 @@ public class RomUpdater extends Updater {
 
     @Override
     public String getSystemCardText(final Context context) {
-        final Version version = Version.parseSafePA(getVersionString(context));
-        return context.getResources().getString(R.string.system_rom, version.toDisplayString());
+        return context.getResources().getString(R.string.system_rom,
+                Version.parseSafePA(getVersionString(context)).toDisplayString());
     }
 
     @Override

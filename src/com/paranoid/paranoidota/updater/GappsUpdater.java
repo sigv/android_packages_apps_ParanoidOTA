@@ -35,31 +35,18 @@ import java.util.Properties;
 
 public class GappsUpdater extends Updater {
 
-    private final Version mRomVersion;
+    private static final Properties sProps = new Properties();
 
-    private final String mPlatform;
-
-    private final String mType;
-
-    private final String mVersion;
-
-    public GappsUpdater(final Context context, final boolean fromAlarm) {
-        super(context, fromAlarm, new Server[] { new GooServer(context, false) },
-                R.string.check_gapps_updates_error);
-
-        mRomVersion = Version.parseSafePA(RomUpdater.getVersionString(context));
-
-        String platform = Utils.getProp("ro.build.version.release").replace(".", "");
-        while (platform.length() < 3) {
-            platform += "0";
+    private static String getProp(final String key) {
+        final String value = sProps.getProperty(key);
+        if (value != null) {
+            // we return right away; we already have everything we want
+            return value;
         }
-        mPlatform = platform;
-
-        final Properties props = new Properties();
 
         try {
             final FileInputStream in = new FileInputStream(new File("/system/etc/g.prop"));
-            props.load(in);
+            sProps.load(in);
             in.close();
         } catch (final FileNotFoundException e) {
             // we carry on with empty properties; we got either missing or non-PA GApps
@@ -67,27 +54,57 @@ public class GappsUpdater extends Updater {
             // we carry on with empty properties; we got a fucked up configuration
         }
 
-        String type = props.getProperty("ro.addon.pa_type");
-        mType = type == null ? "" : type;
+        return sProps.getProperty(key);
+    }
 
-        String version = "0";
-        String fullVersion = props.getProperty("ro.addon.pa_version");
+    private static Version getVersion() {
+        String platform = Utils.getProp("ro.build.version.release").replace(".", "");
+        while (platform.length() < 3) {
+            platform += "0";
+        }
+
+        String versionSuffix = "0";
+        String fullVersion = getProp("ro.addon.pa_version");
         if (fullVersion == null || "".equals(fullVersion)) {
-            fullVersion = props.getProperty("ro.addon.version");
+            fullVersion = getProp("ro.addon.version");
         }
         if (fullVersion != null && !"".equals(fullVersion)) {
             final String[] versions = fullVersion.split("-");
             for (final String v : versions) {
                 try {
                     Integer.parseInt(new String(new char[] { v.charAt(0) }));
-                    version = v;
+                    versionSuffix = v;
                     break;
                 } catch (final NumberFormatException e) {
                     // ignore and continue looking
                 }
             }
         }
-        mVersion = version;
+
+        return Version.parseSafePA("gapps-" + platform.substring(0, 1) + "." +
+                platform.substring(1) + "-" + versionSuffix);
+    }
+
+    private static int getTypeSettingsValue() {
+        String type = getProp("ro.addon.pa_type");
+        if (type == null) {
+            type = "";
+        }
+
+        if ("micro".equals(type)) {
+            return SettingsHelper.GAPPS_MICRO;
+        } else if ("mini".equals(type)) {
+            return  SettingsHelper.GAPPS_MINI;
+        } else if ("stock".equals(type)) {
+            return SettingsHelper.GAPPS_STOCK;
+        } else {
+            return SettingsHelper.GAPPS_FULL;
+        }
+    }
+
+    public GappsUpdater(final Context context, final boolean fromAlarm) {
+        super(context, fromAlarm, new Server[] { new GooServer(context, false) },
+                R.string.check_gapps_updates_error);
     }
 
     @Override
@@ -102,28 +119,26 @@ public class GappsUpdater extends Updater {
         return this;
     }
 
-    private Version getVersion() {
-        return Version.parseSafePA("gapps-" +
-                (mPlatform.length() > 0 ? mPlatform.substring(0, 1) : "0") + "." +
-                (mPlatform.length() > 1 ? mPlatform.substring(1) : "0") + "-" +
-                mVersion);
-    }
-
-    private int getSettingsType() {
-        if ("micro".equals(mType)) {
-            return SettingsHelper.GAPPS_MICRO;
-        } else if ("mini".equals(mType)) {
-            return  SettingsHelper.GAPPS_MINI;
-        } else if ("stock".equals(mType)) {
-            return SettingsHelper.GAPPS_STOCK;
-        } else {
-            return SettingsHelper.GAPPS_FULL;
-        }
-    }
-
     @Override
     public String getSystemCardText(final Context context) {
-        return context.getResources().getString(R.string.system_gapps, mType,
+        final String type;
+        switch (getTypeSettingsValue()) {
+        case SettingsHelper.GAPPS_MICRO:
+            type = "micro";
+            break;
+        case SettingsHelper.GAPPS_MINI:
+            type = "mini";
+            break;
+        case SettingsHelper.GAPPS_STOCK:
+            type = "stock";
+            break;
+        case SettingsHelper.GAPPS_FULL:
+        default:
+            type = "full";
+            break;
+        }
+
+        return context.getResources().getString(R.string.system_gapps, type,
                 getVersion().toDisplayString());
     }
 
@@ -132,9 +147,10 @@ public class GappsUpdater extends Updater {
         final Context c = getContext();
 
         final String device;
-        final String root = "GApps/Android%20" + mRomVersion.getMajorVersion() + "." +
-                mRomVersion.getMinorVersion();
-        switch (getSettingsHelper().getGappsType(getSettingsType())) {
+        final Version romVersion = Version.parseSafePA(RomUpdater.getVersionString(c));
+        final String root = "GApps/Android%20" + romVersion.getMajorVersion() + "." +
+                romVersion.getMinorVersion();
+        switch (getSettingsHelper().getGappsType(getTypeSettingsValue())) {
         case SettingsHelper.GAPPS_MICRO:
             device = root + "/Micro-Modular%20GApps";
             break;
