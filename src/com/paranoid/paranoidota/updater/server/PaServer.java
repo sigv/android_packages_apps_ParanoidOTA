@@ -20,7 +20,6 @@
 package com.paranoid.paranoidota.updater.server;
 
 import com.paranoid.paranoidota.Version;
-import com.paranoid.paranoidota.updater.Server;
 import com.paranoid.paranoidota.updater.UpdatePackage;
 
 import org.json.JSONArray;
@@ -33,32 +32,30 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class PaServer implements Server {
-
-    private String mDevice = null;
-
-    private Version mVersion = null;
-
-    private String mError = null;
+public class PaServer extends Server {
 
     public PaServer() {
+        super();
     }
 
     @Override
     public String getUrl(final String device, final Version version) {
-        mDevice = device;
-        mVersion = version;
-
+        super.getUrl(device, version);
         return String.format("http://api.paranoidandroid.co/updates/%s", device);
     }
 
     @Override
-    public UpdatePackage[] createPackageList(JSONObject response) {
-        mError = response.optString("error");
-        if (mError != null && !"".equals(mError)) {
+    public UpdatePackage[] createPackageList(final JSONObject response) {
+        super.createPackageList(response);
+
+        final String error = response.optString("error");
+        if (error != null && !"".equals(error)) {
             // error out
+            setError(error);
             return new UpdatePackage[0];
         }
+
+        setError(null);
 
         final JSONArray updates = response.optJSONArray("updates");
         if (updates == null) {
@@ -81,9 +78,10 @@ public class PaServer implements Server {
             }
 
             final Version version = Version.parseSafePA(filename);
-            if (version.isNewerThanOrEqualTo(mVersion)) {
+            final Version currentVersion = getVersion();
+            if (version.isNewerThanOrEqualTo(currentVersion)) {
                 try {
-                    list.add(new UpdatePackage(mDevice, version, filename,
+                    list.add(new UpdatePackage(getDevice(), version, filename,
                             Long.parseLong(file.optString("size")), file.optString("md5"),
                             new URL(file.optString("url"))));
                 } catch (final MalformedURLException e) {
@@ -99,10 +97,4 @@ public class PaServer implements Server {
 
         return list.toArray(new UpdatePackage[list.size()]);
     }
-
-    @Override
-    public String getError() {
-        return mError;
-    }
-
 }

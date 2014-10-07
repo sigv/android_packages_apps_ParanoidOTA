@@ -33,6 +33,7 @@ import com.android.volley.toolbox.Volley;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
+import com.paranoid.paranoidota.updater.server.Server;
 
 import org.json.JSONObject;
 
@@ -56,11 +57,11 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
     /** Whether the check was initiated automatically, from an alarm. */
     private final boolean mFromAlarm;
 
-    /** The servers to check. */
-    private final Server[] mServers;
-
     /** The text to display upon failure. */
     private final String mErrorString;
+
+    /** The servers to check. */
+    private final Server[] mServers;
 
     /** The queue to place networking requests inside of. */
     private final RequestQueue mQueue;
@@ -75,12 +76,12 @@ public abstract class Updater implements Response.Listener<JSONObject>, Response
     private int mCurrentServerIndex = -1;
     private Server mCurrentServer = null;
 
-    public Updater(final Context context, final boolean fromAlarm, final Server[] servers,
-            final int errorStringResId) {
+    public Updater(final Context context, final boolean fromAlarm, final int errorStringResId,
+            final Server...servers) {
         mContext = context;
         mFromAlarm = fromAlarm;
-        mServers = servers;
         mErrorString = context.getResources().getString(errorStringResId);
+        mServers = servers;
         mQueue = Volley.newRequestQueue(context, new HurlStack(null,
                 SSLCertificateSocketFactory.getDefault(0, null)));
         mSettingsHelper = new SettingsHelper(getContext());

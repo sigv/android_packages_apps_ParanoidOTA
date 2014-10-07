@@ -24,7 +24,6 @@ import android.content.Context;
 import com.paranoid.paranoidota.Utils;
 import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.signalv.R;
-import com.paranoid.paranoidota.updater.Server;
 import com.paranoid.paranoidota.updater.UpdatePackage;
 
 import org.json.JSONArray;
@@ -37,37 +36,32 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class GooServer implements Server {
+public class GooServer extends Server {
 
     private static final String GAPPS_RESERVED_WORDS = "-signed|-modular|-full|-mini|-micro|-stock";
 
     private final Context mContext;
 
-    private String mDevice = null;
-
-    private Version mVersion = null;
-
-    private String mError = null;
-
     public GooServer(final Context context) {
+        super();
         mContext = context;
     }
 
     @Override
     public String getUrl(final String device, final Version version) {
-        mDevice = device;
-        mVersion = version;
-
+        super.getUrl(device, version);
         return String.format("https://api.goo.im/files/devs/paranoidandroid/roms/%s?ro_board=%s",
                 device, device);
     }
 
     @Override
-    public UpdatePackage[] createPackageList(JSONObject response) {
+    public UpdatePackage[] createPackageList(final JSONObject response) {
+        super.createPackageList(response);
+
         final JSONArray files = response.optJSONArray("files");
         if (files == null) {
             // got nothing - return nothing
-            mError = mContext.getResources().getString(R.string.error_device_not_found_server);
+            setError(mContext.getResources().getString(R.string.error_device_not_found_server));
             return new UpdatePackage[0];
         }
 
@@ -99,7 +93,8 @@ public class GooServer implements Server {
             }
 
             final Version version = Version.parseSafePA(filename);
-            if (version.isNewerThanOrEqualTo(mVersion)) {
+            final Version currentVersion = getVersion();
+            if (version.isNewerThanOrEqualTo(currentVersion)) {
                 URL url = null;
                 try {
                     url = new URL("https://goo.im" + path);
@@ -117,7 +112,7 @@ public class GooServer implements Server {
                 }
 
                 list.add(new UpdatePackage(filename.contains("pa_gapps") ?
-                        UpdatePackage.DEVICE_NAME_GAPPS : mDevice, version, filename,
+                        UpdatePackage.DEVICE_NAME_GAPPS : getDevice(), version, filename,
                         file.optLong("filesize", 0), file.optString("md5"), url));
             }
         }
@@ -128,10 +123,4 @@ public class GooServer implements Server {
 
         return list.toArray(new UpdatePackage[list.size()]);
     }
-
-    @Override
-    public String getError() {
-        return mError;
-    }
-
 }

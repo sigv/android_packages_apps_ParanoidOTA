@@ -17,16 +17,46 @@
  * along with Paranoid OTA.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.paranoid.paranoidota.updater;
+package com.paranoid.paranoidota.updater.server;
 
 import com.paranoid.paranoidota.Version;
+import com.paranoid.paranoidota.updater.UpdatePackage;
 
 import org.json.JSONObject;
 
-public interface Server {
-    public String getUrl(final String device, final Version version);
+public class Server {
+    private String mDevice = null;
 
-    public UpdatePackage[] createPackageList(final JSONObject response);
+    private Version mVersion = null;
 
-    public String getError();
+    private String mError = null;
+
+    protected Server() {
+    }
+
+    protected String getDevice() {
+        return mDevice;
+    }
+
+    protected Version getVersion() {
+        return mVersion;
+    }
+
+    public String getUrl(final String device, final Version version) {
+        mDevice = device;
+        mVersion = version;
+        return null;
+    }
+
+    public UpdatePackage[] createPackageList(final JSONObject response) {
+        return new UpdatePackage[0];
+    }
+
+    public String getError() {
+        return mError;
+    }
+
+    protected void setError(final String error) {
+        mError = error;
+    }
 }

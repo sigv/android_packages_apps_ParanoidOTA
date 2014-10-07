@@ -26,6 +26,7 @@ import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.server.GooServer;
 import com.paranoid.paranoidota.updater.server.PaServer;
+import com.paranoid.paranoidota.updater.server.Server;
 
 public class RomUpdater extends Updater {
 
@@ -42,8 +43,8 @@ public class RomUpdater extends Updater {
     }
 
     public RomUpdater(final Context context, final boolean fromAlarm) {
-        super(context, fromAlarm, new Server[] { new PaServer(), new GooServer(context) },
-                R.string.check_rom_updates_error);
+        super(context, fromAlarm, R.string.check_rom_updates_error,
+                new PaServer(), new GooServer(context));
     }
 
     @Override

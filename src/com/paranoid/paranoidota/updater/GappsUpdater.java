@@ -26,6 +26,7 @@ import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.helpers.SettingsHelper;
 import com.paranoid.paranoidota.signalv.R;
 import com.paranoid.paranoidota.updater.server.GooServer;
+import com.paranoid.paranoidota.updater.server.Server;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -103,8 +104,7 @@ public class GappsUpdater extends Updater {
     }
 
     public GappsUpdater(final Context context, final boolean fromAlarm) {
-        super(context, fromAlarm, new Server[] { new GooServer(context) },
-                R.string.check_gapps_updates_error);
+        super(context, fromAlarm, R.string.check_gapps_updates_error, new GooServer(context));
     }
 
     @Override
