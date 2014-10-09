@@ -19,6 +19,7 @@
 
 package com.paranoid.paranoidota.updater.server;
 
+import com.paranoid.paranoidota.IOUtils;
 import com.paranoid.paranoidota.Version;
 import com.paranoid.paranoidota.updater.UpdatePackage;
 
@@ -82,8 +83,8 @@ public class PaServer extends Server {
             if (version.isNewerThanOrEqualTo(currentVersion)) {
                 try {
                     list.add(new UpdatePackage(getDevice(), version, filename,
-                            Long.parseLong(file.optString("size")), file.optString("md5"),
-                            new URL(file.optString("url"))));
+                            IOUtils.parseHumanReadableByteCount(file.optString("size")),
+                            file.optString("md5"), new URL(file.optString("url"))));
                 } catch (final MalformedURLException e) {
                     // take the ship down
                     throw new RuntimeException("Unable to construct a download link", e);

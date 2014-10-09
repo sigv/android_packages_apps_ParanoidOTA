@@ -202,6 +202,51 @@ public class IOUtils {
     }
 
     /**
+     * @param size formatted size value readable by normal human beings
+     * @return count of bytes
+     */
+    public static long parseHumanReadableByteCount(String size) {
+        if (size == null) {
+            return 0;
+        }
+
+        size = size.trim();
+        if (size.equals("")) {
+            return 0;
+        }
+
+        final String[] bits = size.split(" ");
+
+        final float count;
+        try {
+            count = Float.parseFloat(bits[0]);
+        } catch (final NumberFormatException ignore) {
+            return 0;
+        }
+
+        for (int i = 1; i < bits.length; i++) {
+            final String bit = bits[i];
+            if (bit.equals("B")) {
+                return (long) count;
+            } else if (bit.equals("kB")) {
+                return (long) (count * 1000);
+            } else if (bit.equals("MB")) {
+                return (long) (count * 1000 * 1000);
+            } else if (bit.equals("GB")) {
+                return (long) (count * 1000 * 1000 * 1000);
+            } else if (bit.equals("kiB")) {
+                return (long) (count * 1024);
+            } else if (bit.equals("MiB")) {
+                return (long) (count * 1024 * 1024);
+            } else if (bit.equals("GiB")) {
+                return (long) (count * 1024 * 1024 * 1024);
+            }
+        }
+
+        return (long) count;
+    }
+
+    /**
      * Loads the local dictionary. This call might be a blocking call if the
      * dictionary has not yet been loaded into the memory.
      * 
